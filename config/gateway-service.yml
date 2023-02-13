@@ -1,0 +1,40 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:9005"
+            allowedMethods:
+              - GET
+              - POST
+            allowedHeaders: "*"
+      routes:
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/products/{segment}
+          filters:
+            - SetPath=/{segment}
+        - id: product-service2
+          uri: lb://product-service
+          predicates:
+            - Path=/products
+          filters:
+            - SetPath=/
+        - id: article-service
+          uri: lb://article-service
+          predicates:
+            - Path=/articles/{segment}
+          filters:
+            - SetPath=/{segment}
+        - id: ui-service
+          uri: lb://ui-service
+          predicates:
+            - Path=/, /scripts/**, /**
+
