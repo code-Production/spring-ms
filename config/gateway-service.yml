@@ -13,28 +13,38 @@ spring:
             allowedMethods:
               - GET
               - POST
+#              - DELETE
             allowedHeaders: "*"
       routes:
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/products/{segment}
+            - Path=/products/**
           filters:
-            - SetPath=/{segment}
-        - id: product-service2
-          uri: lb://product-service
+            - RewritePath=/products(?<segment>.*), /$\{segment}
+            - JwtTokenFilter
+        - id: cart-service
+          uri: lb://cart-service
           predicates:
-            - Path=/products
+            - Path=/cart/**
           filters:
-            - SetPath=/
-        - id: article-service
-          uri: lb://article-service
+            - RewritePath=/cart(?<segment>.*), /$\{segment}
+            - JwtTokenFilter
+        - id: auth-service
+          uri: lb://auth-service
           predicates:
-            - Path=/articles/{segment}
+            - Path=/auth/**
           filters:
-            - SetPath=/{segment}
+            - RewritePath=/auth(?<segment>.*), /$\{segment}
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/order/**
+          filters:
+            - RewritePath=/order(?<segment>.*), /$\{segment}
         - id: ui-service
           uri: lb://ui-service
           predicates:
             - Path=/, /scripts/**, /**
-
+          filters:
+            - JwtTokenFilter

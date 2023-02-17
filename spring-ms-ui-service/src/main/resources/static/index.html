@@ -144,7 +144,7 @@
                 <td><b>Actions:</b></td>
             </tr>
             <tbody>
-            <tr ng-repeat="c in CartList">
+            <tr ng-repeat="c in CartList.items">
                 <td>{{$index + 1}}</td>
                 <td>{{c.productDto.title}}</td>
                 <td>{{c.productDto.price}}</td>
@@ -159,10 +159,14 @@
                     <button class="btn btn-danger" ng-click="deleteFromCart(c.productDto.id, null)">Delete</button>
                 </td>
             </tr>
+            <tr>
+                <td></td>
+                <td>Итого:</td>
+                <td>{{CartList.totalPrice}}</td>
+            </tr>
             </tbody>
         </table>
         <button class="btn btn-success" ng-click="saveOrder()">Order</button>
-        <button class="btn btn-success" ng-click="saveOrder2()">Order2</button>
     </div>
 </main>
 </body>
