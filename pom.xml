@@ -9,7 +9,11 @@
         <module>spring-ms-gateway-service</module>
         <module>spring-ms-ui-service</module>
 		<module>spring-ms-product-service</module>
-	</modules>
+        <module>spring-ms-auth-service</module>
+        <module>spring-ms-cart-service</module>
+        <module>spring-ms-common-api</module>
+        <module>spring-ms-order-service</module>
+    </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -27,12 +31,12 @@
 		<spring-cloud.version>2022.0.1</spring-cloud.version>
 	</properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-	</dependencies>
+<!--	<dependencies>-->
+<!--		<dependency>-->
+<!--			<groupId>org.flywaydb</groupId>-->
+<!--			<artifactId>flyway-core</artifactId>-->
+<!--		</dependency>-->
+<!--	</dependencies>-->
 
 	<dependencyManagement>
 		<dependencies>

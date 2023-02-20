@@ -13,6 +13,7 @@ angular.module('app', ['ngCookies'])
                 if (response.data.address !== '') {
                     gatewayAddress = response.data.address;
                     $scope.filteredProducts();
+                    $scope.loadCart();
                 }
             });
     };
@@ -67,8 +68,59 @@ angular.module('app', ['ngCookies'])
          });
      };
 
-    $scope.init();
+    $scope.loadCart = function() {
+        $http({
+            url: gatewayAddress + '/cart',
+            method: 'GET',
+        }).then(function(response) {
+                $scope.CartList = response.data;
+        });
+    };
 
+    $scope.addToCart = function(productId, num) {
+        $http({
+            url: gatewayAddress + '/cart',
+            method: 'POST',
+            params: {
+                id: productId,
+                amount: num
+            }
+        }).then(function(response) {
+            $scope.CartList = response.data;
+        });
+    };
+
+    $scope.deleteFromCart = function(productId, num) {
+        $http({
+            url: gatewayAddress + '/cart',
+            method: 'DELETE',
+            params: {
+                id: productId,
+                amount: num
+            }
+        }).then(function(response) {
+            $scope.CartList = response.data;
+        });
+    };
+
+    $scope.clearCart = function() {
+        $http({
+            url: gatewayAddress + '/cart/clear',
+            method: 'DELETE'
+        }).then(function(response) {
+            $scope.CartList = response.data;
+        });
+    };
+
+    $scope.saveOrder = function() {
+        $http.get(gatewayAddress + '/cart/checkout')
+            .then(function(response) {
+                $scope.loadCart();
+                alert('Order #' + response.data + ' was created!');
+            });
+    };
+
+    $scope.init();
 
 });
 
