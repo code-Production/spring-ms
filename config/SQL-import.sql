@@ -47,7 +47,7 @@ DROP TABLE IF EXISTS Products CASCADE;
 CREATE TABLE IF NOT EXISTS Products (
 	id bigserial PRIMARY KEY,
 	title varchar(255) NOT NULL UNIQUE,
-	price real NOT null,
+	price numeric(10, 2) NOT null,
 	created_at timestamp default current_timestamp
 );
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS Orders (
 	id bigserial PRIMARY KEY,
 	username varchar(255) NOT NULL,
 	address_id bigint,
-	order_total real not null,
+	order_total numeric(10, 2) not null,
 	created_at timestamp default current_timestamp
 );
 
@@ -88,9 +88,9 @@ CREATE TABLE IF NOT EXISTS Orders_Content (
 	id bigserial PRIMARY KEY,
 	order_id bigint NOT NULL,
 	product_id bigint NOT NULL,
-	price real NOT NULL,
+	price numeric(10, 2) NOT NULL,
 	amount integer NOT NULL,
-	sum real not null,
+	sum numeric(10, 2) not null,
 	
 	CONSTRAINT fk_orders FOREIGN KEY (order_id) REFERENCES Orders(id) ON DELETE CASCADE
 );

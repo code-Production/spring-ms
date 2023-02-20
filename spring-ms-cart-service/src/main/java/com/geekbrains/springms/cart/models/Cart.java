@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
 public class Cart {
 
     private List<CartItem> items;
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
     private ProductServiceIntegration productServiceIntegration;
 
@@ -37,7 +39,7 @@ public class Cart {
     @PostConstruct
     public void init(){
         items = new ArrayList<>();
-        totalPrice = 0D;
+        totalPrice = BigDecimal.ZERO;
     }
 
     public Cart addProductToCartById(Long id, Integer amount) {
@@ -48,19 +50,19 @@ public class Cart {
             for (CartItem item : items) {
                 if (item.getProductDto().getId().equals(id)) {
                     item.setAmount(item.getAmount() + amount);
-                    Double total = item.getProductDto().getPrice() * amount;
-                    totalPrice += total;
-                    item.setSum(item.getSum() + total);
+                    BigDecimal total = item.getProductDto().getPrice().multiply(BigDecimal.valueOf(amount));
+                    totalPrice = totalPrice.add(total);
+                    item.setSum(item.getSum().add(total));
                     return this;
                 }
             }
         }
         //cartItem not exists yet
         ProductDto productDto = productServiceIntegration.getProductById(id);
-        double total = productDto.getPrice() * amount;
+        BigDecimal total = productDto.getPrice().multiply(BigDecimal.valueOf(amount));
         CartItem cartItem = new CartItem(productDto, amount,total);
         items.add(cartItem);
-        totalPrice += total;
+        totalPrice = totalPrice.add(total);
         return this;
     }
 
@@ -69,16 +71,17 @@ public class Cart {
         if (!items.isEmpty()) {
             for (CartItem item : items) {
                 if (item.getProductDto().getId().equals(id)) {
-                    Double minusTotal;
+                    BigDecimal minusTotal;
                     if (amount == null || item.getAmount().equals(amount)) {
-                        minusTotal = item.getAmount() * item.getProductDto().getPrice();
+                        minusTotal =
+                                BigDecimal.valueOf(item.getAmount()).multiply(item.getProductDto().getPrice());
                         items.remove(item);
                     } else {
                         item.setAmount(item.getAmount() - amount);
-                        minusTotal = item.getProductDto().getPrice() * amount;
-                        item.setSum(item.getSum() - minusTotal);
+                        minusTotal = item.getProductDto().getPrice().multiply(BigDecimal.valueOf(amount));
+                        item.setSum(item.getSum().subtract(minusTotal));
                     }
-                    totalPrice -= minusTotal;
+                    totalPrice = totalPrice.subtract(minusTotal);
                     return this;
                 }
             }
@@ -88,7 +91,7 @@ public class Cart {
 
     public Cart clearCartContent() {
         items.clear();
-        totalPrice = 0D;
+        totalPrice = BigDecimal.ZERO;
         return this;
     }
 

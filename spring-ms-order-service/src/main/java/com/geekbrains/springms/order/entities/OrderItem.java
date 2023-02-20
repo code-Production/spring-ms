@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,11 +32,11 @@ public class OrderItem {
     private Long productId;
 
     @Column(name = "price")
-    private Double price;
+    private BigDecimal price;
 
     @Column(name = "amount")
     private Integer amount;
 
     @Column(name = "sum")
-    private Double sum;
+    private BigDecimal sum;
 }

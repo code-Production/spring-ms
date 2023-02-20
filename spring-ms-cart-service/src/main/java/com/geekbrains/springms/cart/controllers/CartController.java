@@ -40,7 +40,7 @@ public class CartController {
     }
 
     @GetMapping("/checkout")
-    public Long createOnOrderFromCartContent(){
+    public OrderDto createOnOrderFromCartContent(){
         return cartServices.createAnOrderFromCartContent();
     }
 }

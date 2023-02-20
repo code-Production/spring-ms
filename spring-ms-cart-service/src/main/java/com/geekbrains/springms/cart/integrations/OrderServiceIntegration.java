@@ -21,13 +21,13 @@ public class OrderServiceIntegration {
         this.orderServiceWebClient = orderServiceWebClient;
     }
 
-    public Long createOrderFromCartContent(CartDto cartDto) {
+    public OrderDto createOrderFromCartContent(CartDto cartDto) {
         return orderServiceWebClient.post()
                 .uri("/")
 //                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(cartDto)
                 .retrieve()
-                .bodyToMono(Long.class)
+                .bodyToMono(OrderDto.class)
                 .block();
     }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -16,5 +17,5 @@ public class OrderDto {
     private String username;
     private List<OrderItemDto> orderItems;
     private Long addressId;
-    private Double orderTotal;
+    private BigDecimal orderTotal;
 }
