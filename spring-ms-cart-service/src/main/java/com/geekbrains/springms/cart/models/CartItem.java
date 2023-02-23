@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 
 @Setter
 @Getter
@@ -15,6 +17,6 @@ public class CartItem {
 
     private ProductDto productDto;
     private Integer amount;
-    private Double sum;
+    private BigDecimal sum;
 
 }

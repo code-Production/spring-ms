@@ -42,11 +42,11 @@ public class CartServices {
         return cart.clearCartContent();
     }
 
-    public Long createAnOrderFromCartContent() {
+    public OrderDto createAnOrderFromCartContent() {
         CartDto cartDto = CartMapper.MAPPER.toDto(cart);
-        Long orderId = orderServiceIntegration.createOrderFromCartContent(cartDto);
+        OrderDto orderDto = orderServiceIntegration.createOrderFromCartContent(cartDto);
         cart.clearCartContent();
-        return orderId;
+        return orderDto;
     }
 
 }

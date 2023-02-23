@@ -25,11 +25,12 @@ public class OrderController {
 
     //TODO: add some address param
     @PostMapping("/")
-    public Long createOrder(@RequestBody CartDto cartDto, HttpServletRequest request) {
+    public OrderDto createOrder(@RequestBody CartDto cartDto, HttpServletRequest request) {
 //        String username = request.getHeader("username");
         String username = "BOB";
-        return orderService.createOrder(cartDto, username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Order order = orderService.createOrder(cartDto, username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        return OrderMapper.MAPPER.toDto(order);
     }
 
     @GetMapping("/{id}")

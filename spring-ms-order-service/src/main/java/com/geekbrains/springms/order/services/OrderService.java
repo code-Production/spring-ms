@@ -17,49 +17,38 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class OrderService {
 
     private OrderRepository orderRepository;
 
-    private OrderItemRepository orderItemRepository;
-
     @Autowired
     public void setOrderRepository(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
     }
 
-    @Autowired
-    public void setOrderItemRepository(OrderItemRepository orderItemRepository) {
-        this.orderItemRepository = orderItemRepository;
-    }
-
     @Transactional
-    public Optional<Long> createOrder(CartDto cartDto, String username) {
+    public Optional<Order> createOrder(CartDto cartDto, String username) {
         //TODO check username
         if (!cartDto.getItems().isEmpty()) {
-            Order order = new Order(
-                    null,
-                    username,
-                    null,
-                    null,
-                    cartDto.getTotalPrice(),
-                    null
-            );
-            order = orderRepository.save(order);
-            for (CartItemDto cartItem : cartDto.getItems()) {
-                OrderItem orderItem = new OrderItem(
-                        null,
-                        order,
-                        cartItem.getProductDto().getId(),
-                        cartItem.getProductDto().getPrice(),
-                        cartItem.getAmount(),
-                        cartItem.getSum()
-                );
-                orderItemRepository.save(orderItem);
-            }
-            return Optional.of(order.getId());
+            Order order = new Order();
+            order.setUsername(username);
+            order.setAddressId(null);
+            order.setOrderTotal(cartDto.getTotalPrice());
+            order.setOrderItems(cartDto.getItems().stream()
+                    .map(cartItemDto -> new OrderItem(
+                                null,
+                                order,
+                                cartItemDto.getProductDto().getId(),
+                                cartItemDto.getProductDto().getPrice(),
+                                cartItemDto.getAmount(),
+                                cartItemDto.getSum()
+                    ))
+                    .toList());
+            orderRepository.save(order);
+            return Optional.of(order);
         }
         return Optional.empty();
     }
