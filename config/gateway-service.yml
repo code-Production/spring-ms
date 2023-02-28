@@ -30,12 +30,12 @@ spring:
           filters:
             - RewritePath=/cart(?<segment>.*), /$\{segment}
             - JwtTokenFilter
-        - id: auth-service
-          uri: lb://auth-service
+        - id: user-service
+          uri: lb://user-service
           predicates:
-            - Path=/auth/**
+            - Path=/user/**
           filters:
-            - RewritePath=/auth(?<segment>.*), /$\{segment}
+            - RewritePath=/user(?<segment>.*), /$\{segment}
         - id: order-service
           uri: lb://order-service
           predicates:

@@ -8,10 +8,10 @@ DROP TABLE IF EXISTS Users_roles CASCADE;
 DROP TABLE IF EXISTS Users_details CASCADE;
 DROP TABLE IF EXISTS Users_billings CASCADE;
 
-CREATE TABLE IF NOT EXISTS Users ( 
-	id 			bigserial primary key,
-	username 	varchar(255) not null unique,
-	password 	varchar(255) not null
+CREATE TABLE IF NOT EXISTS Users (
+	id 				bigserial primary key,
+	username 		varchar(255) not null unique,
+	password 		varchar(255) not null
 );
 
 CREATE TABLE IF NOT EXISTS Roles (
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS Roles (
 CREATE TABLE IF NOT EXISTS Users_Roles (
 	user_id 	bigint NOT NULL,
 	role_id 	int NOT NULL,
-	
+
 	PRIMARY KEY (user_id, role_id),
 	CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
 	CONSTRAINT fk_roles FOREIGN KEY (role_id) REFERENCES Roles(id) ON DELETE CASCADE
@@ -30,14 +30,15 @@ CREATE TABLE IF NOT EXISTS Users_Roles (
 
 CREATE TABLE IF NOT EXISTS Users_Details (
     id bigserial PRIMARY KEY,
-    user_id bigint NOT NULL UNIQUE,
-    first_name varchar(255) NOT NULL,
+    user_id bigint NOT NULL, --NEW not null
+    first_name varchar(255),
     last_name varchar(255),
     phone_number varchar(30),
-    email varchar(255),
+    email varchar(255) NOT NULL,
 
     CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS Users_Billings (
     id bigserial PRIMARY KEY,
@@ -50,16 +51,16 @@ CREATE TABLE IF NOT EXISTS Users_Billings (
     CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
-insert into Users (username, password) 
-values 	('log', '$2a$12$D4yxD6.nsKzupQOsRMzQn.9TBe69a10mqSkOVI2yf3db5NF9jLjFy'),
+insert into Users (username, password)
+values 	('log1', '$2a$12$D4yxD6.nsKzupQOsRMzQn.9TBe69a10mqSkOVI2yf3db5NF9jLjFy'),
 		('log2', '$2a$12$D4yxD6.nsKzupQOsRMzQn.9TBe69a10mqSkOVI2yf3db5NF9jLjFy'),
 		('log3', '$2a$12$D4yxD6.nsKzupQOsRMzQn.9TBe69a10mqSkOVI2yf3db5NF9jLjFy');
 
-insert into Roles (name) 
+insert into Roles (name)
 values 	('ROLE_USER'),
 		('ROLE_ADMIN');
 
-insert into users_roles (user_id, role_id) 
+insert into users_roles (user_id, role_id)
 VALUES 	(1, 2),
 		(2, 1),
 		(3, 1);
@@ -83,22 +84,22 @@ CREATE TABLE IF NOT EXISTS Products (
 );
 
 insert into Products
-		(title, price, created_at) 
-values 
+		(title, price, created_at)
+values
 		('Sugar', 90.0, now()),
 		('Milk', 70.0, now()),
-		('Eggs', 80.0, now()), 
-		('Bread', 30.0, now()), 
+		('Eggs', 80.0, now()),
+		('Bread', 30.0, now()),
 		('Sugar11', 40.0, now()),
 		('Sugar2', 90.0, now()),
-		('Milk2', 70.0, now()), 
-		('Eggs2', 80.0, now()), 
-		('Bread2', 30.0, now()), 
+		('Milk2', 70.0, now()),
+		('Eggs2', 80.0, now()),
+		('Bread2', 30.0, now()),
 		('Sugar22', 40.0, now()),
 		('Sugar3', 90.0, now()),
-		('Milk3', 70.0, now()), 
-		('Eggs3', 80.0, now()), 
-		('Bread3', 30.0, now()), 
+		('Milk3', 70.0, now()),
+		('Eggs3', 80.0, now()),
+		('Bread3', 30.0, now()),
 		('Sugar33', 40.0, now()),
 		('Sugar4', 90.0, now());
 
@@ -122,6 +123,6 @@ CREATE TABLE IF NOT EXISTS Orders_Content (
 	price numeric(10, 2) NOT NULL,
 	amount integer NOT NULL,
 	sum numeric(10, 2) not null,
-	
+
 	CONSTRAINT fk_orders FOREIGN KEY (order_id) REFERENCES Orders(id) ON DELETE CASCADE
 );

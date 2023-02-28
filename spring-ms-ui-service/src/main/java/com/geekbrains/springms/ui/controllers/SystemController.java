@@ -1,6 +1,6 @@
 package com.geekbrains.springms.ui.controllers;
 
-import com.geekbrains.springms.api.AddressDto;
+import com.geekbrains.springms.api.ResourceAddressResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +23,7 @@ public class SystemController {
     }
 
     @GetMapping("/gateway-address")
-    public AddressDto getGatewayAddress() {
+    public ResourceAddressResponse getGatewayAddress() {
         List<ServiceInstance> gatewayServices = discoveryClient.getInstances("gateway-service");
         if (gatewayServices != null && gatewayServices.size() > 0) {
             ServiceInstance gatewayInstance = gatewayServices.get(0);
@@ -34,9 +34,9 @@ public class SystemController {
             if (url.contains(host + ":" + port)) {
                 url = url.replace(host + ":" + port, "localhost" + ":" + port);
             }
-            return new AddressDto(url);
+            return new ResourceAddressResponse(url);
         } else {
-            return new AddressDto("");
+            return new ResourceAddressResponse("");
         }
     }
 
