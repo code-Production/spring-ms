@@ -1,6 +1,6 @@
 set search_path = "spring_shop";
 
--- auth-service
+-- user-service
 
 DROP TABLE IF EXISTS Users CASCADE;
 DROP TABLE IF EXISTS Roles CASCADE;
@@ -111,7 +111,8 @@ DROP TABLE IF EXISTS Orders_Content CASCADE;
 CREATE TABLE IF NOT EXISTS Orders (
 	id bigserial PRIMARY KEY,
 	username varchar(255) NOT NULL,
-	address_id bigint,
+	address_id bigint not null,
+	billing_id bigint not null,
 	order_total numeric(10, 2) not null,
 	created_at timestamp default current_timestamp
 );
@@ -122,7 +123,72 @@ CREATE TABLE IF NOT EXISTS Orders_Content (
 	product_id bigint NOT NULL,
 	price numeric(10, 2) NOT NULL,
 	amount integer NOT NULL,
-	sum numeric(10, 2) not null,
+	sum numeric(10, 2) NOT NULL,
 
 	CONSTRAINT fk_orders FOREIGN KEY (order_id) REFERENCES Orders(id) ON DELETE CASCADE
 );
+
+-- address-service
+
+DROP TABLE IF EXISTS Countries CASCADE;
+DROP TABLE IF EXISTS Regions CASCADE;
+DROP TABLE IF EXISTS Cities CASCADE;
+DROP TABLE IF EXISTS Streets CASCADE;
+DROP TABLE IF EXISTS Addresses CASCADE;
+
+CREATE TABLE IF NOT EXISTS Countries (
+	id serial PRIMARY KEY,
+	name varchar(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Regions (
+	id bigserial NOT NULL PRIMARY KEY,
+	name varchar(255) NOT NULL,
+	country_id integer NOT null,
+
+	CONSTRAINT fk_countries FOREIGN KEY (country_id) REFERENCES Countries(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Cities (
+	id bigserial PRIMARY KEY,
+	name varchar(255) NOT NULL,
+	region_id bigint NOT NULL,
+
+	CONSTRAINT fk_regions FOREIGN KEY (region_id) REFERENCES Regions(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Streets (
+	id bigserial PRIMARY KEY,
+	name varchar(255) NOT NULL,
+	city_id bigint NOT NULL,
+
+	CONSTRAINT fk_cities FOREIGN KEY (city_id) REFERENCES Cities(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Addresses (
+    id bigserial primary key,
+    username varchar(255),
+    street_id bigint not null,
+    house_number varchar(255) not null,
+    apartment_number varchar(255),
+
+    constraint fk_streets FOREIGN KEY (street_id) REFERENCES Streets(id) ON DELETE CASCADE
+
+);
+
+INSERT INTO Countries (name) VALUES ('Russia');
+INSERT INTO Regions (name, country_id) VALUES ('Moscow area', 1);
+INSERT INTO Cities (name, region_id) VALUES ('Moscow', 1);
+INSERT INTO Streets (name, city_id) VALUES ('Generala Razina', 1);
+INSERT INTO Streets (name, city_id) VALUES ('Lenina', 1);
+INSERT INTO Cities (name, region_id) VALUES ('Podolsk', 1);
+INSERT INTO Streets (name, city_id) VALUES ('Hrabrih pionerov', 2);
+INSERT INTO Streets (name, city_id) VALUES ('Lenina', 2);
+
+INSERT INTO Addresses
+    (username, street_id, house_number, apartment_number)
+VALUES
+    ('log', 2, '3A', '109'),
+    ('log', 4, '5 str. 6', '12'),
+    ('log1', 3, 'log 1 address', '777');
+

@@ -15,4 +15,7 @@ import java.util.List;
 public class CartDto {
     private List<CartItemDto> items;
     private BigDecimal totalPrice;
+    private String username;
+    private Long addressId;
+    private Long billingId;
 }

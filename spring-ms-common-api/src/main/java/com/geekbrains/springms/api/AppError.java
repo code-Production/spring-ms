@@ -1,4 +1,4 @@
-package com.geekbrains.springms.user.exceptions;
+package com.geekbrains.springms.api;
 
 
 import lombok.AllArgsConstructor;
@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class AppError {
 
     private String code;

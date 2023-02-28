@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
 
 @Component
@@ -28,6 +27,12 @@ public class Cart {
 
     private List<CartItem> items;
     private BigDecimal totalPrice;
+
+    private String username;
+
+    private Long addressId;
+
+    private Long billingId;
 
     private ProductServiceIntegration productServiceIntegration;
 
@@ -40,6 +45,9 @@ public class Cart {
     public void init(){
         items = new ArrayList<>();
         totalPrice = BigDecimal.ZERO;
+        username = null;
+        billingId = null;
+        addressId = null;
     }
 
     public Cart addProductToCartById(Long id, Integer amount) {
@@ -92,9 +100,21 @@ public class Cart {
     public Cart clearCartContent() {
         items.clear();
         totalPrice = BigDecimal.ZERO;
+        username = null;
+        billingId = null;
+        addressId = null;
         return this;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
 
+    public void setBillingId(Long billingId) {
+        this.billingId = billingId;
+    }
 }

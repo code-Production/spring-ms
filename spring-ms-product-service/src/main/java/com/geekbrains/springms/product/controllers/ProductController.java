@@ -37,7 +37,10 @@ public class ProductController {
 
         return productService.findProductById(id)
                 .map(ProductMapper.MAPPER::toDto)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Product with id '%s' cannot be found.", id)
+                ));
     }
 
     @DeleteMapping("/{id}")

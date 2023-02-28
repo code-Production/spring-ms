@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,15 +49,19 @@ public class UserController {
 
     @PostMapping("/auth")
     public AuthResponse authenticate(@RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequest.getUsername(),
-                        authRequest.getPassword()
-                )
-        );
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtils.generateToken(userDetails);
-        return new AuthResponse(token);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequest.getUsername(),
+                            authRequest.getPassword()
+                    )
+            );
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String token = jwtUtils.generateToken(userDetails);
+            return new AuthResponse(token);
+        } catch (BadCredentialsException ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials.");
+        }
     }
 
 
@@ -88,21 +93,45 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public UserDto getUserInfo(HttpServletRequest request) {
-        String username = checkAuthorizationHeaderOrThrowException(request);
-        User user = userService.getUserInfoByName(username);
+    public UserDto getUserInfo(@RequestParam(required = false) String username, HttpServletRequest request) {
+        String usernameAuthorized = checkAuthorizationHeaderOrThrowException(request);
+        boolean specialAuthority = hasSpecialAuthority(request);
+        User user;
+        if (username != null && specialAuthority) {
+            user = userService.getUserInfoByName(username);
+        } else {
+            user = userService.getUserInfoByName(usernameAuthorized);
+        }
         return UserMapper.MAPPER.toDto(user);
     }
+
+
+
+    @GetMapping("/check")
+    public Boolean checkUsernameAndBillingId(
+            @RequestParam String username,
+            @RequestParam(name = "billing_id") Long billingId
+    )
+    {
+        if (userService.checkUsernameOwnsBilling(username, billingId)) {
+            return Boolean.TRUE;
+        } else {
+            return Boolean.FALSE;
+        }
+    }
+
+
 
     @DeleteMapping("/payment")
     public void deleteUserBilling(@RequestParam Long id, HttpServletRequest request) {
         String username = checkAuthorizationHeaderOrThrowException(request);
+        // TODO: 25.02.2023 admin can delete other`s data
         userService.deleteUserBilling(id, username);
     }
 
     @PostMapping("/change-password")
     public void changePassword(
-            @RequestParam(required = false) String usernameToModify,
+            @RequestParam(name ="username_to_modify", required = false) String usernameToModify,
             @RequestParam(name = "old_password") String oldPassword,
             @RequestParam(name = "new_password") String newPassword,
             HttpServletRequest request
@@ -134,7 +163,7 @@ public class UserController {
 
     private String checkAuthorizationHeaderOrThrowException(HttpServletRequest request) {
         String username = request.getHeader("username");
-        if (username != null) {
+        if (username != null && !username.isBlank()) {
             return username;
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access.");
