@@ -5,18 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDto {
+public class AddressDto {
+
     private Long id;
     private String username;
-    private List<OrderItemDto> orderItems;
-    private Long addressId;
-    private Long billingId;
-    private BigDecimal orderTotal;
+    private String country;
+    private String region;
+    private String city;
+    private String street;
+    private String houseNumber;
+    private String apartmentNumber;
+
 }

@@ -35,6 +35,9 @@ public class Order {
     @Column(name = "address_id")
     private Long addressId;
 
+    @Column(name = "billing_id")
+    private Long billingId;
+
     @Column(name = "order_total")
     private BigDecimal orderTotal;
 

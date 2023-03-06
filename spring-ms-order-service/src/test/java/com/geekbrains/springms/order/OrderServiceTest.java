@@ -32,6 +32,7 @@ public class OrderServiceTest {
     @MockBean
     private OrderRepository orderRepository;
 
+    // TODO: 25.02.2023 correct tests
 
     @Test
     public void createOrderFromCartTest() throws JsonProcessingException {
@@ -77,7 +78,7 @@ public class OrderServiceTest {
 
         Mockito.doReturn(null).when(orderRepository).save(Mockito.any(Order.class));
 
-        Order resultOrder = orderService.createOrder(cartDto, "TestUsername")
+        Order resultOrder = orderService.createOrder(cartDto)
                 .orElseThrow(() -> new RuntimeException("Order service returned null order after creating it."));
 
         Assertions.assertNotNull(resultOrder);

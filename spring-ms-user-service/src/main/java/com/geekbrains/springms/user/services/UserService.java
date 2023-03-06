@@ -22,7 +22,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +81,7 @@ public class UserService implements UserDetailsService {
 
 
     @Transactional
-    public void registerUser(UserRegisterRequest registerRequest, boolean specialAuthority) throws Exception {
+    public void registerUser(UserRegisterRequest registerRequest, boolean specialAuthority) {
 
         List<Role> roles;
 
@@ -271,4 +270,32 @@ public class UserService implements UserDetailsService {
                 String.format("Unauthorized try to change a password for user %s", usernameToModify)
         );
     }
+
+    public boolean checkUsernameOwnsBilling(String username, Long billingId) {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("User '%s' cannot be found", username)
+                ));
+
+        userBillingRepository.findById(billingId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        String.format("Billing id '%s' cannot be found.", billingId)
+                ));
+
+        if (user.getUserBillings() != null && !user.getUserBillings().isEmpty()) {
+            for (UserBilling userBilling : user.getUserBillings()) {
+                if (userBilling.getId().equals(billingId)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+
+
 }

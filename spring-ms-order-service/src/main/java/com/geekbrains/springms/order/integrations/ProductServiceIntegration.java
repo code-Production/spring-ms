@@ -1,10 +1,9 @@
-package com.geekbrains.springms.cart.integrations;
+package com.geekbrains.springms.order.integrations;
 
 import com.geekbrains.springms.api.AppError;
 import com.geekbrains.springms.api.ProductDto;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,17 +13,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class ProductServiceIntegration {
 
-    private WebClient productServiceWebClient;
-
-
     @Resource(name = "productServiceWebClient")
-    public void setProductServiceWebClient(WebClient productServiceWebClient) {
-        this.productServiceWebClient = productServiceWebClient;
-    }
+    private WebClient productServiceIntegration;
 
-    public ProductDto getProductById(Long id) {
-
-        return productServiceWebClient.get()
+    public ProductDto findProductById(Long id) {
+        return productServiceIntegration.get()
                 .uri("/" + id)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
@@ -36,4 +29,6 @@ public class ProductServiceIntegration {
                 .bodyToMono(ProductDto.class)
                 .block();
     }
+
+
 }
