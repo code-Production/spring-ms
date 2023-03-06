@@ -57,14 +57,14 @@ public class OrderService {
     }
 
     @Transactional
-    public Optional<Order> createOrder(CartDto cartDto) {
-        if (!userServiceIntegration.checkIfBillingBelongsToUser(cartDto.getUsername(), cartDto.getBillingId())) {
+    public Optional<Order> createOrder(CartDto cartDto, String username) {
+        if (!userServiceIntegration.checkIfBillingBelongsToUser(cartDto.getUsername(), cartDto.getBillingId(), username)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     String.format("Billing id '%s' doesn't belong to user '%s'", cartDto.getBillingId(), cartDto.getUsername())
             );
         }
-        AddressDto addressById = addressServiceIntegration.getAddressById(cartDto.getAddressId());
+        AddressDto addressById = addressServiceIntegration.getAddressById(cartDto.getAddressId(), username);
         if (addressById.getUsername() != null && !addressById.getUsername().equals(cartDto.getUsername())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -112,5 +112,9 @@ public class OrderService {
 
     public Optional<Order> getOrderById(Long id) {
         return orderRepository.findById(id);
+    }
+
+    public List<Order> getUserOrders(String username) {
+        return orderRepository.findAllByUsername(username);
     }
 }

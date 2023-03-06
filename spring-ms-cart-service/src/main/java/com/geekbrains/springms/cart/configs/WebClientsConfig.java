@@ -1,11 +1,9 @@
-package com.geekbrains.springms.cart;
+package com.geekbrains.springms.cart.configs;
 
 import com.geekbrains.springms.cart.services.DiscoveryService;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
-import jakarta.ws.rs.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,7 @@ import reactor.netty.http.client.HttpClient;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-public class SpringMsCartServiceConfig {
+public class WebClientsConfig {
 
     private static final int TIMEOUT = 30000;
 

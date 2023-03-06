@@ -78,7 +78,7 @@ public class OrderServiceTest {
 
         Mockito.doReturn(null).when(orderRepository).save(Mockito.any(Order.class));
 
-        Order resultOrder = orderService.createOrder(cartDto)
+        Order resultOrder = orderService.createOrder(cartDto, "TestUsername")
                 .orElseThrow(() -> new RuntimeException("Order service returned null order after creating it."));
 
         Assertions.assertNotNull(resultOrder);

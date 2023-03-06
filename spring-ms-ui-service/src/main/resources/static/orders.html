@@ -1,0 +1,55 @@
+<div class="container">
+    <div class="py-1 text-center">
+        <h2>Заказы</h2>
+    </div>
+    <hr class="my-4">
+    <div ng-repeat="order in orders" ng-show="username != null">
+        <h3>Заказ #{{order.id}}</h3>
+        <table class="table table-hover" >
+            <tr class="bg-light">
+                <td><b>Position:</b></td>
+                <td><b>Title:</b></td>
+                <td><b>Price:</b></td>
+                <td><b>Amount:</b></td>
+                <td><b>Sum:</b></td>
+            </tr>
+            <tbody>
+            <tr ng-repeat="orderItem in order.orderItems">
+                <td>{{$index + 1}}</td>
+                <td>{{orderItem.title}}</td>
+                <td>{{orderItem.price}}</td>
+                <td>{{orderItem.amount}}</td>
+                <td>{{orderItem.sum}}</td>
+            </tr>
+            </tbody>
+            <tr>
+                <td><b>Total:</b></td>
+                <td>{{order.orderTotal}}</td>
+            </tr>
+        </table>
+        <table class="table table-hover">
+            <tr>
+                <td><b>Address:</b></td>
+            </tr>
+            <tr>
+<!--                <td><b>{{order.addressId}}</b></td>-->
+                <td>{{order.addressTitle}}</td>
+            </tr>
+            <tr>
+                <td><b>Card number:</b></td>
+            </tr>
+            <tr>
+<!--                <td><b>{{order.billingId}}</b></td>-->
+                <td>{{order.billingTitle}}</td>
+            </tr>
+        </table>
+        <hr class="my-4">
+    </div>
+</div>
+
+<div class="container" ng-show="username == null">
+    <div class="alert alert-warning" role="alert" ng-show="username == null">
+        To see your orders please <a class="alert-link">log in</a>.
+        <!--        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>-->
+    </div>
+</div>

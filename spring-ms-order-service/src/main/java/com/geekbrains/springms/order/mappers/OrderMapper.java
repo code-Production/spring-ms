@@ -4,13 +4,27 @@ import com.geekbrains.springms.api.OrderDto;
 import com.geekbrains.springms.order.entities.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@Mapper(uses = OrderItemMapper.class)
-public interface OrderMapper {
+@Component
+public class OrderMapper {
 
-    OrderMapper MAPPER = Mappers.getMapper(OrderMapper.class);
+    private OrderItemMapper orderItemMapper;
 
-    OrderDto toDto(Order order);
+    @Autowired
+    public void setOrderItemMapper(OrderItemMapper orderItemMapper) {
+        this.orderItemMapper = orderItemMapper;
+    }
 
-
+    public OrderDto toDto(Order order) {
+        return new OrderDto(
+                order.getId(),
+                order.getUsername(),
+                orderItemMapper.toDtoList(order.getOrderItems()),
+                order.getAddressId(),
+                order.getBillingId(),
+                order.getOrderTotal()
+        );
+    }
 }

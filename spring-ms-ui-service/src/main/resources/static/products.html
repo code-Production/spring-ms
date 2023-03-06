@@ -1,0 +1,85 @@
+<div class="d-flex flex-nowrap">
+    <div class="d-flex flex-column align-items-end flex-shrink-0 p-3 " >
+
+<!--        ng-show ADMIN-->
+        <div class="p-2">
+            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
+                <span class="fs-4"><b>Add product:</b></span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column" >
+                <li>
+                    <form novalidate ng-submit="addProduct()">
+                        <input class="form-control" type="text" placeholder="title"  ng-model="newProduct.title">
+                        <p></p>
+                        <input class="form-control" type="number" placeholder="price" ng-model="newProduct.price">
+                        <p></p>
+                        <button class="btn btn-primary" type="submit">Add</button>
+                        <button class="btn btn-secondary" type="reset">Reset</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <div class="border-top my-3"></div>
+
+        <div class="p-2">
+            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
+                <span class="fs-4"><b>Filter product:</b></span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column">
+                <li>
+                    <form novalidate ng-submit="filteredProducts()">
+                        <input class="form-control" type="number" placeholder="min price"  ng-model="filter.min_price">
+                        <p></p>
+                        <input class="form-control" type="number" placeholder="max price" ng-model="filter.max_price">
+                        <p></p>
+                        <button class="btn btn-primary" type="submit">Filter</button>
+                        <button class="btn btn-secondary" type="button" ng-click="clearFilter()">Reset</button>
+                    </form>
+                </li>
+            </ul>
+            <hr>
+        </div>
+    </div>
+
+    <div class="b-example-divider b-example-vr"></div>
+
+    <div class="container">
+        <h3>Список товаров:</h3>
+
+        <table class="table table-hover ">
+            <tr class="bg-light">
+                <td><b>Id:</b></td>
+                <td><b>Title:</b></td>
+                <td><b>Price:</b></td>
+                <td><b>Actions:</b></td>
+            </tr>
+            <tbody>
+                <tr ng-repeat="p in ProductList">
+                    <td>{{p.id}}</td>
+                    <td>{{p.title}}</td>
+                    <td>{{p.price}}</td>
+                    <td>
+                        <button class="btn btn-primary" ng-click="addToCart(p.id, 1)">to Cart</button>
+                        <button class="btn btn-danger" ng-click="deleteProduct(p.id)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table>
+            <tr>
+                <td><button class="btn btn-primary" ng-click="prevPage()" ng-if="!firstPage">Prev</button></td>
+                <td><b>Page: {{pageNumber + 1}}</b></td>
+                <td><button class="btn btn-primary" ng-click="nextPage()" ng-if="!lastPage">Next</button></td>
+            </tr>
+
+        </table>
+        <br>
+        <button class="btn btn-success" onclick="window.location.href='#!/cart'">Proceed to cart</button>
+    </div>
+</div>

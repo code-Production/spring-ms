@@ -18,7 +18,7 @@ public class UserServiceIntegration {
     @Resource(name = "userServiceWebClient")
     private WebClient userServiceWebClient;
 
-    public Boolean checkIfBillingBelongsToUser(String username, Long billingId) {
+    public Boolean checkIfBillingBelongsToUser(String username, Long billingId, String authorizedUsername) {
         return userServiceWebClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -26,6 +26,7 @@ public class UserServiceIntegration {
                         .queryParam("username", username)
                         .queryParam("billing_id", billingId)
                         .build())
+                .header("username", authorizedUsername)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
                         clientResponse -> clientResponse

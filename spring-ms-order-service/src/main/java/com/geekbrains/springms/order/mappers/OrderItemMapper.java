@@ -2,17 +2,42 @@ package com.geekbrains.springms.order.mappers;
 
 import com.geekbrains.springms.api.OrderItemDto;
 import com.geekbrains.springms.order.entities.OrderItem;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import com.geekbrains.springms.order.integrations.ProductServiceIntegration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Mapper
-public interface OrderItemMapper {
+@Component
+public class OrderItemMapper {
 
-    OrderItemMapper MAPPER = Mappers.getMapper(OrderItemMapper.class);
+    //не знаю какое решение лучше, либо тут запрашивать title, либо на фронте (что тоже самое) или хранить его в БД ордеров,
+    // но так как базы изолированы не понятно как синхронизировать title здесь и в базе продуктов,
+    // здесь решение выглядит приглядней чем на фронте
+    //или пофигу что столько запросов?
 
-    OrderItemDto toDto(OrderItem orderItem);
+    private ProductServiceIntegration productServiceIntegration;
 
-    List<OrderItemDto> toDtoList(List<OrderItem> orderItems);
+    @Autowired
+    public void setProductServiceIntegration(ProductServiceIntegration productServiceIntegration) {
+        this.productServiceIntegration = productServiceIntegration;
+    }
+
+    public OrderItemDto toDto(OrderItem orderItem) {
+        String title = productServiceIntegration.findProductById(orderItem.getProductId()).getTitle();
+        return new OrderItemDto(
+                orderItem.getId(),
+                orderItem.getProductId(),
+                title,
+                orderItem.getPrice(),
+                orderItem.getAmount(),
+                orderItem.getSum()
+        );
+    }
+
+    public List<OrderItemDto> toDtoList(List<OrderItem> orderItemList) {
+        return orderItemList.stream().map(this::toDto).toList();
+    }
 }
