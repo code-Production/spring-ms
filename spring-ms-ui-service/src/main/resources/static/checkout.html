@@ -1,0 +1,207 @@
+<div class="container" ng-show="username == null">
+    <div class="alert alert-warning" role="alert">
+        To proceed with your order please <a class="alert-link">log in</a>.
+        <!--        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>-->
+    </div>
+</div>
+
+<div class="container" ng-show="username != null && !checkSizeCheckoutPage()">
+    <div class="alert alert-warning" role="alert">
+        To proceed with your order please <a class="alert-link">fill the cart</a>.
+        <!--        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>-->
+    </div>
+</div>
+
+<div class="container" ng-show="username != null && checkSizeCheckoutPage()">
+
+    <script src="/scripts/bootstrap.bundle.min.js"></script>
+
+    <main>
+        <div class="py-1 text-center">
+            <h2>Checkout form</h2>
+        </div>
+
+        <div class="row g-5">
+
+            <div class="col-md-5 col-lg-4 order-md-last">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Your cart</span>
+                    <span class="badge bg-primary rounded-pill">{{totalAmount}}</span>
+                </h4>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item d-flex justify-content-between lh-sm" ng-repeat="c in CartList.items">
+                        <div>
+                            <h6 class="my-0">{{c.productDto.title}}</h6>
+                            <small class="text-muted">{{c.productDto.price}}$ x {{c.amount}}</small>
+                        </div>
+                        <span class="text-muted">${{c.sum}}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total (USD)</span>
+                        <strong>${{CartList.totalPrice}}</strong>
+                    </li>
+                </ul>
+<!--                <form class="card p-2">-->
+<!--                    <div class="input-group">-->
+<!--                        <input type="text" class="form-control" placeholder="Promo code">-->
+<!--                        <button type="submit" class="btn btn-secondary">Redeem</button>-->
+<!--                    </div>-->
+<!--                </form>-->
+            </div>
+
+            <div class="col-md-7 col-lg-8">
+
+                <div class="mb-3">
+                    <label for="addressSelection" class="form-label"><h4>Address</h4></label>
+                    <select class="form-select" id="addressSelection" >
+                        <option value="10000">Create new address or choose existing</option>
+                        <option value="{{$index + 1}}" ng-repeat="addr in addresses" selected>
+                            {{addr.country}},
+                            {{addr.region}},
+                            {{addr.city}},
+                            {{addr.street}},
+                            {{addr.houseNumber}},
+                            {{addr.apartmentNumber}}
+                        </option>
+                    </select>
+                </div>
+
+                <hr class="my-4">
+
+                <form class="needs-validation" novalidate>
+                    <div class="row g-3" ng-show="addressPanelVisible">
+
+                        <div class="col-md-3">
+                            <label for="zip" class="form-label">Zip</label>
+                            <input type="text" class="form-control" id="zip" placeholder="" required>
+                            <div class="invalid-feedback">
+                                Zip code required.
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="countrySelection" class="form-label">Country</label>
+                            <select class="form-select" id="countrySelection" required>
+                                <option value="">Choose...</option>
+                                <option value="{{$index + 1}}" ng-repeat="country in Countries">{{country}}</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid country.
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label for="regionSelection" class="form-label">Region</label>
+                            <select class="form-select" id="regionSelection" required>
+                                <option value="">Choose...</option>
+                                <option value="{{$index + 1}}" ng-repeat="region in Regions">{{region}}</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please provide a valid region.
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label for="citySelection" class="form-label">City</label>
+                            <select class="form-select" id="citySelection" required>
+                                <option value="">Choose...</option>
+                                <option value="{{$index + 1}}" ng-repeat="city in Cities">{{city}}</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid city.
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <label for="streetSelection" class="form-label">Street</label>
+                            <select class="form-select" id="streetSelection" required>
+                                <option value="">Choose...</option>
+                                <option value="{{$index + 1}}" ng-repeat="street in Streets">{{street}}</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please provide a valid street.
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="address" class="form-label">House number</label>
+                            <input type="text" class="form-control" id="address" placeholder="House or building" required>
+                            <div class="invalid-feedback">
+                                Please enter your shipping address.
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="address2" class="form-label">Apartment number <span class="text-muted">(Optional)</span></label>
+                            <input type="text" class="form-control" id="address2" placeholder="Apartment or suite">
+                        </div>
+
+                    </div>
+
+                    <br>
+                    <hr class="my-4" ng-show="addressPanelVisible">
+
+                    <div class="mb-3">
+                        <label for="paymentSelection" class="form-label"><h4>Payment method</h4></label>
+                        <select class="form-select" id="paymentSelection" >
+                            <option value="10000">Create new payment method or choose existing</option>
+                            <option value="{{$index + 1}}" ng-repeat="billing in billings" selected>
+                                {{billing.cardNumber}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="my-3" ng-show="billingPanelVisible">
+                        <div class="form-check">
+                            <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" checked required>
+                            <label class="form-check-label" for="paypal">PayPal</label>
+                        </div>
+                    </div>
+
+
+                    <div class="row gy-3" ng-show="billingPanelVisible">
+                        <div class="col-md-6">
+                            <label for="cc-name" class="form-label">Name on card</label>
+                            <input type="text" class="form-control" id="cc-name" placeholder="" required>
+                            <small class="text-muted">Full name as displayed on card</small>
+                            <div class="invalid-feedback">
+                                Name on card is required
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="cc-number" class="form-label">Credit card number</label>
+                            <input type="text" class="form-control" id="cc-number" placeholder="" required>
+                            <div class="invalid-feedback">
+                                Credit card number is required
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="cc-expiration" class="form-label">Expiration</label>
+                            <input type="text" class="form-control" id="cc-expiration" placeholder="" required>
+                            <div class="invalid-feedback">
+                                Expiration date required
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="cc-cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cc-cvv" placeholder="" required>
+                            <div class="invalid-feedback">
+                                Security code required
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button class="w-100 btn btn-success btn-lg" ng-click="createOrder()" type="submit">Make an order!</button>
+
+                    <hr class="my-4">
+                </form>
+            </div>
+        </div>
+    </main>
+
+</div>

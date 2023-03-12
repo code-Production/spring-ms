@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Component
 public class JwtTokenFilter extends AbstractGatewayFilterFactory<JwtTokenFilter.Config> {
@@ -39,10 +40,9 @@ public class JwtTokenFilter extends AbstractGatewayFilterFactory<JwtTokenFilter.
             public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
                 ServerHttpRequest request = exchange.getRequest();
 
-                if (request.getHeaders().containsKey("username")) {
-                    return onError(exchange, "Forbidden header in request: username", HttpStatus.BAD_REQUEST);
+                if (request.getHeaders().containsKey("username") || request.getHeaders().containsKey("roles")) {
+                    return onError(exchange, "Forbidden header in request.", HttpStatus.BAD_REQUEST);
                 }
-
                 if (containsAuthHeader(request)) {
                     String token = getAuthToken(request);
                     try {
@@ -84,7 +84,10 @@ public class JwtTokenFilter extends AbstractGatewayFilterFactory<JwtTokenFilter.
 
     private void populateRequestWithHeaders(ServerHttpRequest request, String token) {
         Claims claims = jwtUtils.getClaimsFromToken(token);
+        System.out.println("populating:" + claims.getSubject());
         request.mutate().header("username", claims.getSubject());
+        List<String> authorities = (List<String>) claims.get("authorities");
+        authorities.forEach(role -> request.mutate().header("roles", role));
     }
 
 

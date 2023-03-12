@@ -23,9 +23,10 @@ public class AddressServiceIntegration {
     private WebClient addressServiceWebClient;
 
 
-    public AddressDto getAddressById(Long id) {
+    public AddressDto getAddressById(Long id, String username) {
         return addressServiceWebClient.get()
                 .uri("/" + id)
+                .header("username", username)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
                         clientResponse -> clientResponse.bodyToMono(AppError.class)

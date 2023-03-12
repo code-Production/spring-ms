@@ -15,14 +15,13 @@ import java.util.Map;
 public class JwtUtils {
 
     public String generateToken(UserDetails userDetails) {
-
         List<String> authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
         Map<String, Object> claims = new HashMap<>(Map.of("authorities", authorities));
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
                 .setClaims(claims)
+                .setSubject(userDetails.getUsername()) //must be after claims
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 30000000))
                 .signWith(SignatureAlgorithm.HS256, "secret_key")

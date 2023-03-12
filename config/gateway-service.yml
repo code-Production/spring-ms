@@ -36,12 +36,21 @@ spring:
             - Path=/user/**
           filters:
             - RewritePath=/user(?<segment>.*), /$\{segment}
+            - JwtTokenFilter
         - id: order-service
           uri: lb://order-service
           predicates:
             - Path=/order/**
           filters:
             - RewritePath=/order(?<segment>.*), /$\{segment}
+            - JwtTokenFilter
+        - id: address-service
+          uri: lb://address-service
+          predicates:
+            - Path=/address/**
+          filters:
+            - RewritePath=/address(?<segment>.*), /$\{segment}
+            - JwtTokenFilter
         - id: ui-service
           uri: lb://ui-service
           predicates:

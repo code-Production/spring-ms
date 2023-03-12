@@ -26,9 +26,11 @@ public class OrderServiceIntegration {
         this.orderServiceWebClient = orderServiceWebClient;
     }
 
-    public OrderDto createOrderFromCartContent(CartDto cartDto) {
+    //todo route roles
+    public OrderDto createOrderFromCartContent(CartDto cartDto, String username) {
         return orderServiceWebClient.post()
                 .uri("/")
+                .header("username", username)
                 .bodyValue(cartDto)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
@@ -41,3 +43,4 @@ public class OrderServiceIntegration {
                 .block();
     }
 }
+

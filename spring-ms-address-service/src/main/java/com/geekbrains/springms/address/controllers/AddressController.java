@@ -32,12 +32,25 @@ public class AddressController {
 
     @GetMapping("/{id}")
     public AddressDto getAddressById(@PathVariable Long id, HttpServletRequest request) {
+        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
         Address address = addressService.findById(id);
+        if (!address.getUsername().equals(authorizedUsername)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request.");
+        }
         return addressMapper.toDto(address);
     }
 
-    @GetMapping("/all/{username}")
-    public List<AddressDto> getUserAddresses(@PathVariable String username, HttpServletRequest request) {
+    @GetMapping("/all")
+    public List<AddressDto> getUserAddresses(@RequestParam(required = false) String username, HttpServletRequest request) {
+        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+        System.out.println("authorizedUsername:" + request.getHeader("username"));
+        boolean specialAuthority = hasSpecialAuthority(request);
+        if (username != null && !specialAuthority) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request.");
+        }
+        if (username == null) {
+            username = authorizedUsername;
+        }
         List<Address> userAddresses = addressService.findAllByUsername(username);
         return userAddresses.stream().map(address -> addressMapper.toDto(address)).toList();
     }
@@ -46,6 +59,7 @@ public class AddressController {
     public AddressDto createOrUpdateAddress(@RequestBody AddressDto addressDto, HttpServletRequest request) {
         String username = checkAuthorizationHeaderOrThrowException(request);
         boolean specialAuthority = hasSpecialAuthority(request);
+        //unauthorized posting
         if (!username.equals(addressDto.getUsername()) && !specialAuthority) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request.");
         }

@@ -1,32 +1,30 @@
-angular.module('app3', ['ngCookies'])
-    .controller('signupController', function ($scope, $http, $cookies) {
+angular.module('app').controller('signupController', function ($scope, $http, $window) {
 
-        let gatewayAddress = null;
+    let gatewayAddress;
 
-        $scope.init = function () {
-            $http.get('/gateway-address')
-                .then(function(response){
-                    console.log(response.data.address);
-                    if (response.data.address !== '') {
-                        gatewayAddress = response.data.address;
-                    }
-                });
-        };
-
-        $scope.init();
-
-        $scope.register = function () {
-            $http({
-                url: gatewayAddress + '/auth/register',
-                method: 'POST',
-                data: $scope.user
-            }).then(function(response) {
-                console.log(response.status);
-                // $cookies.put("token", response.data.token);
+    $scope.init = function () {
+        $http.get('/gateway-address')
+            .then(function(response){
+                console.log(response.data.address);
+                if (response.data.address !== '') {
+                    gatewayAddress = response.data.address;
+                }
             });
-        };
+    };
 
-    });
+    $scope.init();
 
+    $scope.registerUser = function() {
+        $http.post(gatewayAddress + '/user/register', $scope.newUser)
+            .then(function(response) {
+                if (response.status == 200) {
+                    alert('Success!');
+                    $window.location.href = "/";
+                    $scope.newUser.email = null;
+                    $scope.newUser.username = null;
+                    $scope.newUser.password = null;
+                }
+            })
+    }
 
-
+});
