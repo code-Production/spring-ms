@@ -51,11 +51,31 @@
 		</dependencies>
 	</dependencyManagement>
 
+<!--	<build>-->
+<!--		<pluginManagement>-->
+<!--			<plugins>-->
+<!--				<plugin>-->
+<!--					<groupId>org.springframework.boot</groupId>-->
+<!--					<artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--					<configuration>-->
+<!--						<image>-->
+<!--							<builder>paketobuildpacks/builder:full</builder>-->
+<!--						</image>-->
+<!--					</configuration>-->
+<!--				</plugin>-->
+<!--			</plugins>-->
+<!--		</pluginManagement>-->
+<!--	</build>-->
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<image>
+						<builder>paketobuildpacks/builder:full</builder>
+					</image>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

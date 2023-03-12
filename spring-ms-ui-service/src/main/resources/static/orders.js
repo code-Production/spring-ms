@@ -19,10 +19,7 @@ angular.module('app').controller('orderController', function ($scope, $http) {
     $scope.loadOrders = function() {
         $http({
             url: gatewayAddress + '/order/all',
-            method: 'GET',
-            params: {
-                username: 'log'
-            }
+            method: 'GET'
         }).then(function(response) {
             $scope.orders = response.data;
             for (let i = 0; i <= $scope.orders.length; i++) {

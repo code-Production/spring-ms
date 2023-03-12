@@ -27,7 +27,7 @@ public class DiscoveryService {
             String url = serviceInstance.getUri().toString();
             //to fix cors error
             if (url.contains(host + ":" + port)) {
-                url = url.replace(host + ":" + port, "localhost" + ":" + port);
+                url = url.replace(host + ":" + port, "host.docker.internal" + ":" + port);
             }
             return Optional.of(url);
         }
