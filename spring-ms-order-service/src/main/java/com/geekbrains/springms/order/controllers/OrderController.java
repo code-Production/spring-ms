@@ -59,11 +59,15 @@ public class OrderController {
     }
 
     @GetMapping("/all")
-    public List<OrderDto> getUserOrders(@RequestParam String username, HttpServletRequest request) {
-        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
-        if (!username.equals(authorizedUsername)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
-        }
+    public List<OrderDto> getUserOrders(
+            @RequestHeader String username,
+            HttpServletRequest request
+    )
+    {
+//        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+//        if (username != null && !username.equals(authorizedUsername)) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
+//        }
         return orderService.getUserOrders(username).stream().map(orderMapper::toDto).toList();
     }
 

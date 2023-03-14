@@ -1,0 +1,9 @@
+server:
+  port: 9008
+
+spring:
+  application:
+    name: cart-service
+  jackson:
+    serialization:
+      indent-output: true

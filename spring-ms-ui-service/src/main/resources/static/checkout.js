@@ -68,6 +68,7 @@ angular.module('app').controller('checkoutController', function ($scope, $http, 
             $scope.loadCart();
             alert(response.status);
             window.location.href = "#!/orders";
+            $scope.loadOrders();
         })
     };
 
