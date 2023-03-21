@@ -33,8 +33,10 @@ public class AddressController {
     @GetMapping("/{id}")
     public AddressDto getAddressById(@PathVariable Long id, HttpServletRequest request) {
         String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+        boolean specialAuthority = hasSpecialAuthority(request);
+
         Address address = addressService.findById(id);
-        if (!address.getUsername().equals(authorizedUsername)) {
+        if (!address.getUsername().equals(authorizedUsername) && !specialAuthority) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request.");
         }
         return addressMapper.toDto(address);
@@ -43,9 +45,9 @@ public class AddressController {
     @GetMapping("/all")
     public List<AddressDto> getUserAddresses(@RequestParam(required = false) String username, HttpServletRequest request) {
         String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
-        System.out.println("authorizedUsername:" + request.getHeader("username"));
         boolean specialAuthority = hasSpecialAuthority(request);
-        if (username != null && !specialAuthority) {
+
+        if (username != null && !username.equals(authorizedUsername) && !specialAuthority) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request.");
         }
         if (username == null) {
@@ -71,6 +73,7 @@ public class AddressController {
     public void deleteAddress(@PathVariable Long id, HttpServletRequest request) {
         String usernameAuthorized = checkAuthorizationHeaderOrThrowException(request);
         boolean specialAuthority = hasSpecialAuthority(request);
+        //check authorization inside after address extracted from repo
         addressService.deleteById(id, usernameAuthorized, specialAuthority);
     }
 
@@ -101,7 +104,7 @@ public class AddressController {
         if (request.getHeaders("roles").hasMoreElements()) {
             Enumeration<String> roles = request.getHeaders("roles");
             while (roles.hasMoreElements()) {
-                if (roles.nextElement().equals("ROLE_ADMIN")) {
+                if (roles.nextElement().equalsIgnoreCase("ROLE_ADMIN")) {
                     return true;
                 }
             }

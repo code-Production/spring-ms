@@ -14,7 +14,7 @@
         <module>spring-ms-common-api</module>
         <module>spring-ms-order-service</module>
 		<module>spring-ms-address-service</module>
-	</modules>
+    </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>

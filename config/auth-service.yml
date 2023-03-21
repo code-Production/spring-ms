@@ -1,0 +1,12 @@
+server:
+  port: 9011
+
+spring:
+  application:
+    name: auth-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9012/realms/master
+          jwk-set-uri: http://localhost:9012/realms/master/protocol/openid-connect/certs

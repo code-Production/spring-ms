@@ -45,11 +45,11 @@
                         <button type="button" class="btn btn-outline-primary me-2" ng-click="wantToLogIn()">Login</button>
                         <button type="button" class="btn btn-primary" onclick="window.location.href='#!/signup'">Sign-up</button>
                     </div>
-                    <form class="align-middle" ng-submit="tryToAuth()" ng-show="showLoginPanel">
+                    <form class="align-middle" ng-show="showLoginPanel">
                         <div class="input-group input-group-sm" style="padding: 4px;">
                             <input id="navLoginField" class="form-control" ng-model="user.username" type="text">
                             <input id="navPasswordField" class="form-control" ng-model="user.password" type="password">
-                            <button type="submit" class="btn btn-outline-primary me-2">Login</button>
+                            <button type="button" class="btn btn-outline-primary me-2" ng-click="tryToAuth()">Login</button>
                             <button type="button" class="btn btn-outline-secondary me-2" ng-click="hideLoginPanel()">🡰</button>
 
                         </div>

@@ -26,7 +26,7 @@ public class OrderServiceIntegration {
         this.orderServiceWebClient = orderServiceWebClient;
     }
 
-    //todo route roles
+    // TODO: 21.03.2023 relay roles headers
     public OrderDto createOrderFromCartContent(CartDto cartDto, String username) {
         return orderServiceWebClient.post()
                 .uri("/")

@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Enumeration;
 import java.util.List;
 
 @RestController
@@ -39,6 +40,7 @@ public class OrderController {
     @PostMapping("/")
     public OrderDto createOrder(@RequestBody CartDto cartDto, HttpServletRequest request) {
         String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+
         if (!authorizedUsername.equals(cartDto.getUsername())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
         }
@@ -49,10 +51,12 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public OrderDto getOrderById(@PathVariable Long id, HttpServletRequest request) {
+        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+        boolean specialAuthority = hasSpecialAuthority(request);
         Order order = orderService.getOrderById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
-        if (!order.getUsername().equals(authorizedUsername)) {
+
+        if (!order.getUsername().equals(authorizedUsername) && !specialAuthority) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
         }
         return orderMapper.toDto(order);
@@ -60,14 +64,19 @@ public class OrderController {
 
     @GetMapping("/all")
     public List<OrderDto> getUserOrders(
-            @RequestHeader String username,
+            @RequestParam(required = false) String username,
             HttpServletRequest request
     )
     {
-//        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
-//        if (username != null && !username.equals(authorizedUsername)) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
-//        }
+        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+        boolean specialAuthority = hasSpecialAuthority(request);
+
+        if (username != null && !username.equals(authorizedUsername) && !specialAuthority) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
+        }
+        if (username == null) {
+            username = authorizedUsername;
+        }
         return orderService.getUserOrders(username).stream().map(orderMapper::toDto).toList();
     }
 
@@ -79,17 +88,17 @@ public class OrderController {
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access.");
     }
-//    @GetMapping("/inter")
-//    public Boolean check(@RequestParam String username,
-//                      @RequestParam(name = "billing_id") Long billingId
-//    )
-//    {
-//        return userServiceIntegration.checkIfBillingBelongsToUser(username, billingId);
-//    }
-//
-//    @GetMapping("/inter2")
-//    public AddressDto getUserAddressById(@RequestParam Long id) {
-//        return addressServiceIntegration.getAddressById(id);
-//    }
+
+    private boolean hasSpecialAuthority(HttpServletRequest request) {
+        if (request.getHeaders("roles").hasMoreElements()) {
+            Enumeration<String> roles = request.getHeaders("roles");
+            while (roles.hasMoreElements()) {
+                if (roles.nextElement().equalsIgnoreCase("ROLE_ADMIN")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 }

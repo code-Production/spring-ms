@@ -4,6 +4,7 @@ import com.geekbrains.springms.api.ResourceAddressResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
@@ -40,5 +41,13 @@ public class SystemController {
         }
     }
 
-
+//    @GetMapping("/callback")
+//    public void callback(
+//            @RequestParam String session_state,
+//            @RequestParam String code
+//    )
+//    {
+//        System.out.println("Code:" + code);
+//        System.out.println("Session_state:" + session_state);
+//    }
 }
