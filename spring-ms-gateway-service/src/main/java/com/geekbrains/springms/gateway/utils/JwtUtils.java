@@ -1,22 +1,26 @@
 package com.geekbrains.springms.gateway.utils;
 
-import io.jsonwebtoken.*;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
-import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class JwtUtils {
+    public static List<String> getRolesFromJwtToken(Jwt jwt) {
 
-    public Claims getClaimsFromToken(String token) throws ExpiredJwtException {
-        return Jwts.parser()
-                .setSigningKey("secret_key")
-                .parseClaimsJws(token)
-                .getBody();
-    }
+        Map<String, Object> clients = jwt.getClaimAsMap("resource_access");
+        Assert.notNull(clients, "Token doesn't have resource_access field.");
 
-    public boolean checkIfTokenExpired(String token) throws ExpiredJwtException {
-        return getClaimsFromToken(token).getExpiration().before(new Date());
+        Map<String, Object> gateway = (Map<String, Object>) clients.get("gateway");
+        Assert.notNull(gateway, "Token doesn't have gateway field.");
+
+        List<String> roles = (List<String>) gateway.get("roles");
+        Assert.notNull(roles, "Token doesn't have roles.");
+
+        return roles;
     }
 
 }

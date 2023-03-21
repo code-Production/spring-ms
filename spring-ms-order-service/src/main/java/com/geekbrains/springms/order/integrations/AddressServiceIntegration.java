@@ -22,7 +22,7 @@ public class AddressServiceIntegration {
     @Resource(name = "addressServiceWebClient")
     private WebClient addressServiceWebClient;
 
-
+    // TODO: 21.03.2023 relay roles headers
     public AddressDto getAddressById(Long id, String username) {
         return addressServiceWebClient.get()
                 .uri("/" + id)

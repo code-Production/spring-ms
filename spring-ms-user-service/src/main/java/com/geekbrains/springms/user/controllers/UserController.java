@@ -71,9 +71,9 @@ public class UserController {
             throws Exception {
 
         boolean specialAuthority = hasSpecialAuthority(request);
-        //admin must be logged in
+        //admin must be logged in to register other user
         if (specialAuthority) {
-            String username = checkAuthorizationHeaderOrThrowException(request);
+            checkAuthorizationHeaderOrThrowException(request);
         }
         userService.registerUser(registerRequest, specialAuthority);
     }
@@ -110,9 +110,14 @@ public class UserController {
     @GetMapping("/check")
     public Boolean checkUsernameAndBillingId(
             @RequestParam String username,
-            @RequestParam(name = "billing_id") Long billingId
+            @RequestParam(name = "billing_id") Long billingId,
+            HttpServletRequest request
     )
     {
+        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+        if (!authorizedUsername.equals(username)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access");
+        }
         if (userService.checkUsernameOwnsBilling(username, billingId)) {
             return Boolean.TRUE;
         } else {
@@ -153,7 +158,7 @@ public class UserController {
         if (request.getHeaders("roles").hasMoreElements()) {
             Enumeration<String> roles = request.getHeaders("roles");
             while (roles.hasMoreElements()) {
-                if (roles.nextElement().equals("ROLE_ADMIN")) {
+                if (roles.nextElement().equalsIgnoreCase("ROLE_ADMIN")) {
                     return true;
                 }
             }

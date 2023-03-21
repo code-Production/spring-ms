@@ -16,6 +16,7 @@ public class ProductServiceIntegration {
     @Resource(name = "productServiceWebClient")
     private WebClient productServiceIntegration;
 
+    // TODO: 21.03.2023 relay roles headers
     public ProductDto findProductById(Long id) {
         return productServiceIntegration.get()
                 .uri("/" + id)

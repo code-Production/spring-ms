@@ -18,6 +18,7 @@ public class UserServiceIntegration {
     @Resource(name = "userServiceWebClient")
     private WebClient userServiceWebClient;
 
+    // TODO: 21.03.2023 relay roles headers
     public Boolean checkIfBillingBelongsToUser(String username, Long billingId, String authorizedUsername) {
         return userServiceWebClient
                 .get()

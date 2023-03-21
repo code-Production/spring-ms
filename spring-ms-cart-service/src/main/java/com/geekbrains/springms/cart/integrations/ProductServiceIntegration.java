@@ -22,6 +22,7 @@ public class ProductServiceIntegration {
         this.productServiceWebClient = productServiceWebClient;
     }
 
+    // TODO: 21.03.2023 relay roles headers
     public ProductDto getProductById(Long id) {
 
         return productServiceWebClient.get()

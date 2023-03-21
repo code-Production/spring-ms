@@ -71,12 +71,19 @@ public class CartController {
 
     @GetMapping("/checkout")
     public OrderDto createOnOrderFromCartContent(
-            @RequestHeader String username,
             @RequestParam(name = "address_id") Long addressId,
-            @RequestParam(name = "billing_id") Long billingId
+            @RequestParam(name = "billing_id") Long billingId,
+            HttpServletRequest request
     ){
-        return cartServices.createAnOrderFromCartContent(username, addressId, billingId);
+        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
+        return cartServices.createAnOrderFromCartContent(authorizedUsername, addressId, billingId);
     }
 
-
+    private String checkAuthorizationHeaderOrThrowException(HttpServletRequest request) {
+        String username = request.getHeader("username");
+        if (username != null && !username.isBlank()) {
+            return username;
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access.");
+    }
 }
