@@ -1,15 +1,13 @@
 package com.geekbrains.springms.address.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 
 @Entity
 @Table(schema = "spring_shop", name = "addresses")
@@ -32,4 +30,5 @@ public class Address {
 
     @Column(name = "apartment_number")
     private String apartmentNumber;
+
 }

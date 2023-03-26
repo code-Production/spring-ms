@@ -6,6 +6,8 @@ import com.geekbrains.springms.user.entities.Role;
 import com.geekbrains.springms.user.entities.User;
 import com.geekbrains.springms.user.entities.UserBilling;
 import com.geekbrains.springms.user.entities.UserDetails;
+import com.geekbrains.springms.user.mappers.UserBillingMapper;
+import com.geekbrains.springms.user.mappers.UserDetailsMapper;
 import com.geekbrains.springms.user.mappers.UserMapper;
 import com.geekbrains.springms.user.repositories.RoleRepository;
 import com.geekbrains.springms.user.repositories.UserBillingRepository;
@@ -113,14 +115,23 @@ public class UserService implements UserDetailsService {
                 });
 
         UserDetails userDetails = new UserDetails();
-        User user = new User(
-                null,
-                registerRequest.getUsername(),
-                bCryptPasswordEncoder.encode(registerRequest.getPassword()),
-                roles,
-                userDetails,
-                null
-        );
+        User user = new User().newBuilder()
+                .setId(null)
+                .setUsername(registerRequest.getUsername())
+                .setPassword(bCryptPasswordEncoder.encode(registerRequest.getPassword()))
+                .setRoles(roles)
+                .setUserDetails(userDetails)
+                .setUserBillings(null)
+                .build();
+
+//        User user = new User(
+//                null,
+//                registerRequest.getUsername(),
+//                bCryptPasswordEncoder.encode(registerRequest.getPassword()),
+//                roles,
+//                userDetails,
+//                null
+//        );
         userDetails.setEmail(registerRequest.getEmail());
         userDetails.setUser(user);
         userRepository.save(user);
@@ -136,10 +147,20 @@ public class UserService implements UserDetailsService {
                         String.format("User '%s' cannot be found to update.", userDto.getUsername())
                 ));
 
-        User newUser = UserMapper.MAPPER.toEntity(userDto); //get what we can
+//        User newUser = UserMapper.MAPPER.toEntity(userDto); //get what we can
 
-        newUser.setId(oldUser.getId()); // safe setting
-        newUser.setPassword(oldUser.getPassword());
+        User.Builder newUserBuilder = new User().newBuilder()
+                .setId(oldUser.getId()) // safe setting
+                .setUsername(userDto.getUsername())
+                .setPassword(oldUser.getPassword())
+                .setUserBillings(UserBillingMapper.MAPPER.toEntityList(userDto.getUserBillings()))
+                .setUserDetails(UserDetailsMapper.MAPPER.toEntity(userDto.getUserDetails()));
+
+
+
+//        newUser.setId(oldUser.getId()); // safe setting
+//        newUser.setPassword(oldUser.getPassword());
+
         //admin can set roles to users
         if (specialAuthority) {
             List<Role> roles = userDto.getRoles().stream()
@@ -149,19 +170,22 @@ public class UserService implements UserDetailsService {
                             String.format("No such role can be found as '%s'.", s)
                     )))
                     .toList();
-            newUser.setRoles(roles);
+            newUserBuilder.setRoles(roles);
+//            newUser.setRoles(roles);
         } else {
-            newUser.setRoles(oldUser.getRoles());// mapper roles -> string
+            newUserBuilder.setRoles(oldUser.getRoles());
+//            newUser.setRoles(oldUser.getRoles());// mapper roles -> string
         }
-
         //if they are somehow missed in JSON, to return populated object anyway
-        if (newUser.getUserDetails() == null && oldUser.getUserDetails() != null) {
-            newUser.setUserDetails(oldUser.getUserDetails());
+        if (userDto.getUserDetails() == null && oldUser.getUserDetails() != null) {
+            newUserBuilder.setUserDetails(oldUser.getUserDetails());
+//            newUser.setUserDetails(oldUser.getUserDetails());
         }
-        if (newUser.getUserBillings() == null && oldUser.getUserBillings() != null) {
-            newUser.setUserBillings(oldUser.getUserBillings());
+        if (userDto.getUserBillings() == null && oldUser.getUserBillings() != null) {
+            newUserBuilder.setUserBillings(oldUser.getUserBillings());
+//            newUser.setUserBillings(oldUser.getUserBillings());
         }
-
+        User newUser = newUserBuilder.build();
         //restore link to db
         newUser.getUserDetails().setId(oldUser.getUserDetails().getId());
         newUser.getUserDetails().setUser(newUser); //not present in Dto
@@ -261,7 +285,8 @@ public class UserService implements UserDetailsService {
         )
         {
             newPassword = bCryptPasswordEncoder.encode(newPassword);
-            user.setPassword(newPassword);
+            user.newBuilder().setPassword(newPassword);
+//            user.setPassword(newPassword);
 //            userRepository.save(user);
             return;
         }
@@ -293,9 +318,5 @@ public class UserService implements UserDetailsService {
         }
         return false;
     }
-
-
-
-
 
 }

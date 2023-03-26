@@ -26,7 +26,7 @@ public interface UserMapper {
         return roles.stream().map(Role::getName).toList();
     }
 
-    @Mapping(target = "roles", ignore = true)
-    User toEntity(UserDto userDto);
+//    @Mapping(target = "roles", ignore = true)
+//    User toEntity(UserDto userDto);
 
 }

@@ -39,16 +39,26 @@ public class AddressMapper {
 
 
     public AddressDto toDto(Address address) {
-        return new AddressDto(
-                address.getId(),
-                address.getUsername(),
-                address.getStreet().getCity().getRegion().getCountry().getName(),
-                address.getStreet().getCity().getRegion().getName(),
-                address.getStreet().getCity().getName(),
-                address.getStreet().getName(),
-                address.getHouseNumber(),
-                address.getApartmentNumber()
-        );
+        return AddressDto.builder()
+                .id(address.getId())
+                .username(address.getUsername())
+                .country(address.getStreet().getCity().getRegion().getCountry().getName())
+                .region(address.getStreet().getCity().getRegion().getName())
+                .city(address.getStreet().getCity().getName())
+                .street(address.getStreet().getName())
+                .houseNumber(address.getHouseNumber())
+                .apartmentNumber(address.getApartmentNumber())
+                .build();
+//        return new AddressDto(
+//                address.getId(),
+//                address.getUsername(),
+//                address.getStreet().getCity().getRegion().getCountry().getName(),
+//                address.getStreet().getCity().getRegion().getName(),
+//                address.getStreet().getCity().getName(),
+//                address.getStreet().getName(),
+//                address.getHouseNumber(),
+//                address.getApartmentNumber()
+//        );
     }
 
     @Transactional
@@ -89,13 +99,20 @@ public class AddressMapper {
                         )
                 ));
 
-        return new Address(
-                addressDto.getId(),
-                addressDto.getUsername(),
-                street,
-                addressDto.getHouseNumber(),
-                addressDto.getApartmentNumber()
-        );
+        return Address.builder()
+                .id(addressDto.getId())
+                .username(addressDto.getUsername())
+                .street(street)
+                .houseNumber(addressDto.getHouseNumber())
+                .apartmentNumber(addressDto.getApartmentNumber())
+                .build();
+//        return new Address(
+//                addressDto.getId(),
+//                addressDto.getUsername(),
+//                street,
+//                addressDto.getHouseNumber(),
+//                addressDto.getApartmentNumber()
+//        );
     }
 
 

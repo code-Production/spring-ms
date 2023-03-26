@@ -27,14 +27,22 @@ public class OrderItemMapper {
 
     public OrderItemDto toDto(OrderItem orderItem) {
         String title = productServiceIntegration.findProductById(orderItem.getProductId()).getTitle();
-        return new OrderItemDto(
-                orderItem.getId(),
-                orderItem.getProductId(),
-                title,
-                orderItem.getPrice(),
-                orderItem.getAmount(),
-                orderItem.getSum()
-        );
+        return new OrderItemDto().newBuilder()
+                .setId(orderItem.getId())
+                .setProductId(orderItem.getProductId())
+                .setTitle(title)
+                .setPrice(orderItem.getPrice())
+                .setAmount(orderItem.getAmount())
+                .setSum(orderItem.getSum())
+                .build();
+//        return new OrderItemDto(
+//                orderItem.getId(),
+//                orderItem.getProductId(),
+//                title,
+//                orderItem.getPrice(),
+//                orderItem.getAmount(),
+//                orderItem.getSum()
+//        );
     }
 
     public List<OrderItemDto> toDtoList(List<OrderItem> orderItemList) {
