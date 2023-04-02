@@ -18,13 +18,21 @@ public class OrderMapper {
     }
 
     public OrderDto toDto(Order order) {
-        return new OrderDto(
-                order.getId(),
-                order.getUsername(),
-                orderItemMapper.toDtoList(order.getOrderItems()),
-                order.getAddressId(),
-                order.getBillingId(),
-                order.getOrderTotal()
-        );
+        return new OrderDto().newBuilder()
+                .setId(order.getId())
+                .setUsername(order.getUsername())
+                .setOrderItems(orderItemMapper.toDtoList(order.getOrderItems()))
+                .setAddressId(order.getAddressId())
+                .setBillingId(order.getBillingId())
+                .setOrderTotal(order.getOrderTotal())
+                .build();
+//        return new OrderDto(
+//                order.getId(),
+//                order.getUsername(),
+//                orderItemMapper.toDtoList(order.getOrderItems()),
+//                order.getAddressId(),
+//                order.getBillingId(),
+//                order.getOrderTotal()
+//        );
     }
 }

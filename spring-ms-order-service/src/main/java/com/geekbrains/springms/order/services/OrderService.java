@@ -95,15 +95,26 @@ public class OrderService {
             order.setBillingId(cartDto.getBillingId());
             order.setOrderTotal(cartDto.getTotalPrice());
             order.setOrderItems(cartDto.getItems().stream()
-                    .map(cartItemDto -> new OrderItem(
-                                null,
-                                order,
-                                cartItemDto.getProductDto().getId(),
-                                cartItemDto.getProductDto().getPrice(),
-                                cartItemDto.getAmount(),
-                                cartItemDto.getSum()
-                    ))
+                    .map(cartItemDto -> OrderItem.newBuilder()
+                                .setId(null)
+                                .setOrder(order)
+                                .setProductId(cartItemDto.getProductDto().getId())
+                                .setPrice(cartItemDto.getProductDto().getPrice())
+                                .setAmount(cartItemDto.getAmount())
+                                .setSum(cartItemDto.getSum())
+                                .build()
+//                        new OrderItem(
+//                                        null,
+//                                        order,
+//                                        cartItemDto.getProductDto().getId(),
+//                                        cartItemDto.getProductDto().getPrice(),
+//                                        cartItemDto.getAmount(),
+//                                        cartItemDto.getSum()
+//                                )
+                    )
                     .toList());
+
+
             orderRepository.save(order);
             return Optional.of(order);
         }
