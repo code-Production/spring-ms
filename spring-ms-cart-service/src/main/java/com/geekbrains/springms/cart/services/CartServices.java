@@ -16,12 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-
+import com.geekbrains.springms.api.RedisPrefix;
 
 @Service
 public class CartServices {
 
-    private static final String redisPrefix = "cart_";
 
     private RedisTemplate<String, Cart> carts;
 
@@ -46,11 +45,13 @@ public class CartServices {
 
     public Cart getCart(String username, String guestCartId) {
 
+        String prefixedGuestCartId = addPrefixTo(guestCartId);
+        String prefixedUsername = addPrefixTo(username);
 
         Cart guestCart = null;
 
-        if (Boolean.TRUE.equals(carts.hasKey(guestCartId))) {
-            guestCart = carts.opsForValue().get(guestCartId);
+        if (Boolean.TRUE.equals(carts.hasKey(prefixedGuestCartId))) {
+            guestCart = carts.opsForValue().get(prefixedGuestCartId);
         }
 
         //logged in
@@ -63,13 +64,13 @@ public class CartServices {
                 }
             }
             if (guestCart != null) {
-                carts.delete(guestCartId); //remove guest cart from redis
+                carts.delete(prefixedGuestCartId); //remove guest cart from redis
             }
-            return getCartOrCreate(username);
+            return getCartOrCreate(prefixedUsername);
         }
 
         //not logged in
-        return getCartOrCreate(guestCartId);
+        return getCartOrCreate(prefixedGuestCartId);
 
     }
 
@@ -81,15 +82,17 @@ public class CartServices {
         return guestCartId;
     }
 
-    private String addPrefixTo(String id) {
-        return redisPrefix + id;
+    private String addPrefixTo(String str) {
+        return RedisPrefix.CART.getPrefix() + str;
     }
 
 
 
     public OrderDto createAnOrderFromCartContent(String username, Long addressId, Long billingId) {
 
-        Cart cart = getCartOrCreate(username);
+        String prefixedUsername = addPrefixTo(username);
+
+        Cart cart = getCartOrCreate(prefixedUsername);
 
         cart.setUsername(username);
         cart.setAddressId(addressId);
@@ -105,6 +108,8 @@ public class CartServices {
         {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart parameters must not be null or empty.");
         }
+
+
         CartDto cartDto = CartMapper.MAPPER.toDto(cart);
         OrderDto orderDto = orderServiceIntegration.createOrderFromCartContent(cartDto, username);
         clearCartContent(username, null);
@@ -123,8 +128,9 @@ public class CartServices {
 
 
     public Cart addProductToCartById(String username, String guestCartId, Long productId, Integer amount) {
-        String cartId = chooseId(username, guestCartId);
-        Cart cart = getCartOrCreate(cartId);
+        String prefixedCartId = addPrefixTo(chooseId(username, guestCartId));
+
+        Cart cart = getCartOrCreate(prefixedCartId);
 
         if (amount == null) {amount = 1;}
 
@@ -136,7 +142,7 @@ public class CartServices {
                     cart.setTotalPrice(cart.getTotalPrice().add(total));
                     item.setSum(item.getSum().add(total));
 
-                    carts.opsForValue().set(cartId, cart);
+                    carts.opsForValue().set(prefixedCartId, cart);
                     return cart;
                 }
             }
@@ -148,14 +154,14 @@ public class CartServices {
         CartItem cartItem = new CartItem(productDto, amount,total);
         cart.getItems().add(cartItem);
         cart.setTotalPrice(cart.getTotalPrice().add(total));
-        carts.opsForValue().set(cartId, cart);
+        carts.opsForValue().set(prefixedCartId, cart);
         return cart;
     }
 
 
     public Cart removeProductFromCartById(String username, String guestCartId, Long productId, Integer amount) {
-        String cartId = chooseId(username, guestCartId);
-        Cart cart = getCartOrCreate(cartId);
+        String prefixedCartId = addPrefixTo(chooseId(username, guestCartId));
+        Cart cart = getCartOrCreate(prefixedCartId);
 
         if (!cart.getItems().isEmpty()) {
             for (CartItem item : cart.getItems()) {
@@ -174,7 +180,7 @@ public class CartServices {
                     }
 
                     cart.setTotalPrice(cart.getTotalPrice().subtract(minusTotal));
-                    carts.opsForValue().set(cartId, cart);
+                    carts.opsForValue().set(prefixedCartId, cart);
                     return cart;
                 }
             }
@@ -183,9 +189,9 @@ public class CartServices {
     }
 
     public Cart clearCartContent(String username, String guestCartId) {
-        String cartId = chooseId(username, guestCartId);
+        String prefixedCartId = addPrefixTo(chooseId(username, guestCartId));
         Cart cart = new Cart();
-        carts.opsForValue().set(cartId, cart);
+        carts.opsForValue().set(prefixedCartId, cart);
         return cart;
     }
 

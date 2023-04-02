@@ -3,7 +3,6 @@ package com.geekbrains.springms.order.integrations;
 import com.geekbrains.springms.api.AppError;
 import com.geekbrains.springms.api.ProductDto;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -11,11 +10,12 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @Component
-public class ProductServiceIntegration {
+public class ProductServiceIntegration implements ProductFunction {
 
     @Resource(name = "productServiceWebClient")
     private WebClient productServiceIntegration;
 
+    @Override
     public ProductDto findProductById(Long id) {
         return productServiceIntegration.get()
                 .uri("/" + id)
