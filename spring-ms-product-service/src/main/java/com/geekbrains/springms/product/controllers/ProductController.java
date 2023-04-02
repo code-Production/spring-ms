@@ -53,7 +53,8 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public void deleteProductById(@PathVariable Long id, HttpServletResponse response) {
-        productService.deleteProductById(id);
+        productServiceCached.deleteProductById(id);
+//        productService.deleteProductById(id);
     }
 
     @PutMapping("/")

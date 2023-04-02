@@ -43,6 +43,12 @@ public class ProductServiceCached implements ProductFunction {
         return productService.updateProduct(productDto);
     }
 
+    @Override
+    public void deleteProductById(Long id) {
+        products.delete(id.toString());
+        productService.deleteProductById(id);
+    }
+
     private String addPrefixTo(String str) {
         return RedisPrefix.PRODUCT.getPrefix() + str;
     }

@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface ProductFunction {
     ProductDto findProductById(Long id);
     ProductDto updateProduct(ProductDto productDto);
+    void deleteProductById(Long id);
 }
