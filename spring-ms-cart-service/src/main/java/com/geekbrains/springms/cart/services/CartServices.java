@@ -6,6 +6,7 @@ import com.geekbrains.springms.api.OrderDto;
 import com.geekbrains.springms.api.ProductDto;
 import com.geekbrains.springms.cart.integrations.OrderServiceIntegration;
 import com.geekbrains.springms.cart.integrations.ProductServiceIntegration;
+import com.geekbrains.springms.cart.integrations.ProductServiceIntegrationCached;
 import com.geekbrains.springms.cart.mapper.CartMapper;
 import com.geekbrains.springms.cart.models.Cart;
 import com.geekbrains.springms.cart.models.CartItem;
@@ -32,6 +33,13 @@ public class CartServices {
     private OrderServiceIntegration orderServiceIntegration;
 
     private ProductServiceIntegration productServiceIntegration;
+
+    private ProductServiceIntegrationCached productServiceIntegrationCached;
+
+    @Autowired
+    public void setProductServiceIntegrationCached(ProductServiceIntegrationCached productServiceIntegrationCached) {
+        this.productServiceIntegrationCached = productServiceIntegrationCached;
+    }
 
     @Autowired
     public void setOrderServiceIntegration(OrderServiceIntegration orderServiceIntegration) {
@@ -149,7 +157,8 @@ public class CartServices {
         }
 
         //cartItem not exists yet
-        ProductDto productDto = productServiceIntegration.getProductById(productId);
+//        ProductDto productDto = productServiceIntegration.getProductById(productId);
+        ProductDto productDto = productServiceIntegrationCached.getProductById(productId);
         BigDecimal total = productDto.getPrice().multiply(BigDecimal.valueOf(amount));
         CartItem cartItem = new CartItem(productDto, amount,total);
         cart.getItems().add(cartItem);

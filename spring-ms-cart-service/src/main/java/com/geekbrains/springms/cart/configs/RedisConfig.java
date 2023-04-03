@@ -1,5 +1,6 @@
 package com.geekbrains.springms.cart.configs;
 
+import com.geekbrains.springms.api.ProductDto;
 import com.geekbrains.springms.cart.models.Cart;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +22,17 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Cart> redisTemplate() {
+    public RedisTemplate<String, Cart> redisTemplateForCart() {
         RedisTemplate<String, Cart> template = new RedisTemplate<>();
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setConnectionFactory(jedisConnectionFactory());
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, ProductDto> redisTemplateForProduct() {
+        RedisTemplate<String, ProductDto> template = new RedisTemplate<>();
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         template.setConnectionFactory(jedisConnectionFactory());
