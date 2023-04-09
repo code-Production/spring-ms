@@ -174,9 +174,9 @@ public class CartServices {
 
         if (!cart.getItems().isEmpty()) {
             for (CartItem item : cart.getItems()) {
-                System.out.println("before");
+//                System.out.println("before");
                 if (item.getProductDto().getId().equals(productId)) {
-                    System.out.println("inside");
+//                    System.out.println("inside");
                     BigDecimal minusTotal;
                     if (amount == null || item.getAmount().equals(amount)) {
                         minusTotal =

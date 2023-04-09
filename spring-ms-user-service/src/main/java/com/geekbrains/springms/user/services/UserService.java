@@ -1,5 +1,6 @@
 package com.geekbrains.springms.user.services;
 
+import com.geekbrains.springms.api.UserBillingDto;
 import com.geekbrains.springms.api.UserDto;
 import com.geekbrains.springms.api.UserRegisterRequest;
 import com.geekbrains.springms.user.entities.Role;
@@ -31,35 +32,24 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     private UserRepository userRepository;
-
     private RoleRepository roleRepository;
-
-    private UserDetailsRepository userDetailsRepository;
-
     private UserBillingRepository userBillingRepository;
-
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserIdentityMap USER_IDENTITY_MAP = RegistryService.getInstance().getUserIdentityMap();
+
 
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
     @Autowired
     public void setRoleRepository(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
-
     @Autowired
     public void setBCryptPasswordEncoder(BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
-
-    @Autowired
-    public void setUserDetailsRepository(UserDetailsRepository userDetailsRepository) {
-        this.userDetailsRepository = userDetailsRepository;
-    }
-
     @Autowired
     public void setUserBillingRepository(UserBillingRepository userBillingRepository) {
         this.userBillingRepository = userBillingRepository;
@@ -78,6 +68,9 @@ public class UserService implements UserDetailsService {
                 .map(r -> new SimpleGrantedAuthority(r.getName()))
                 .map(ga -> (GrantedAuthority) (ga))
                 .toList();
+
+        USER_IDENTITY_MAP.addUser(UserMapper.MAPPER.toDto(user));
+
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 
@@ -124,17 +117,11 @@ public class UserService implements UserDetailsService {
                 .setUserBillings(null)
                 .build();
 
-//        User user = new User(
-//                null,
-//                registerRequest.getUsername(),
-//                bCryptPasswordEncoder.encode(registerRequest.getPassword()),
-//                roles,
-//                userDetails,
-//                null
-//        );
         userDetails.setEmail(registerRequest.getEmail());
         userDetails.setUser(user);
         userRepository.save(user);
+
+        USER_IDENTITY_MAP.addUser(UserMapper.MAPPER.toDto(user));
 //        userDetailsRepository.save(userDetails); //cascade.all
     }
 
@@ -146,6 +133,8 @@ public class UserService implements UserDetailsService {
                         HttpStatus.NOT_FOUND,
                         String.format("User '%s' cannot be found to update.", userDto.getUsername())
                 ));
+
+        USER_IDENTITY_MAP.deleteUser(oldUser.getUsername());
 
 //        User newUser = UserMapper.MAPPER.toEntity(userDto); //get what we can
 
@@ -236,12 +225,24 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public User getUserInfoByName(String username) {
-        return userRepository.findUserByUsername(username)
+    public UserDto getUserInfoByName(String username) {
+
+        UserDto mappedUser = USER_IDENTITY_MAP.findUser(username);
+        if (mappedUser != null) {
+            return mappedUser;
+        }
+
+        User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         String.format("User '%s' cannot be found.", username)
                 ));
+        UserDto userDto = UserMapper.MAPPER.toDto(user);
+
+        USER_IDENTITY_MAP.addUser(userDto);
+
+        return userDto;
+
     }
 
     @Transactional
@@ -251,6 +252,9 @@ public class UserService implements UserDetailsService {
                         HttpStatus.NOT_FOUND,
                         String.format("User '%s' cannot be found for deletion billing.", username)
                 ));
+
+        USER_IDENTITY_MAP.deleteUser(username);
+
         if (user.getUserBillings() != null && !user.getUserBillings().isEmpty()) {
             for (UserBilling userBilling : user.getUserBillings()) {
                 if (userBilling.getId().equals(id)) {
@@ -279,6 +283,8 @@ public class UserService implements UserDetailsService {
                         HttpStatus.BAD_REQUEST,
                         String.format("No such user '%s' was found.", usernameToModify)
                 ));
+
+        USER_IDENTITY_MAP.deleteUser(usernameToModify);
         //admin can give no password to change users passwords but not his own password
         if ((specialAuthority && !usernameAuthorized.equals(usernameToModify)) ||
                         (bCryptPasswordEncoder.matches(oldPassword, user.getPassword()))
@@ -297,21 +303,30 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean checkUsernameOwnsBilling(String username, Long billingId) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        String.format("User '%s' cannot be found", username)
-                ));
+        UserDto userDto;
 
-        userBillingRepository.findById(billingId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        String.format("Billing id '%s' cannot be found.", billingId)
-                ));
+        UserDto mappedUser = USER_IDENTITY_MAP.findUser(username);
 
-        if (user.getUserBillings() != null && !user.getUserBillings().isEmpty()) {
-            for (UserBilling userBilling : user.getUserBillings()) {
-                if (userBilling.getId().equals(billingId)){
+        if (mappedUser == null) {
+            User user = userRepository.findUserByUsername(username)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            String.format("User '%s' cannot be found", username)
+                    ));
+            userDto = UserMapper.MAPPER.toDto(user);
+        } else {
+            userDto = mappedUser;
+        }
+
+//        userBillingRepository.findById(billingId)
+//                .orElseThrow(() -> new ResponseStatusException(
+//                        HttpStatus.NOT_FOUND,
+//                        String.format("Billing id '%s' cannot be found.", billingId)
+//                ));
+
+        if (userDto.getUserBillings() != null && !userDto.getUserBillings().isEmpty()) {
+            for (UserBillingDto userBillingDto : userDto.getUserBillings()) {
+                if (userBillingDto.getId().equals(billingId)){
                     return true;
                 }
             }
