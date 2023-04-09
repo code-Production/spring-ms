@@ -284,7 +284,9 @@ public class UserService implements UserDetailsService {
                         String.format("No such user '%s' was found.", usernameToModify)
                 ));
 
-        USER_IDENTITY_MAP.deleteUser(usernameToModify);
+        //no password in dto
+//        USER_IDENTITY_MAP.deleteUser(usernameToModify);
+
         //admin can give no password to change users passwords but not his own password
         if ((specialAuthority && !usernameAuthorized.equals(usernameToModify)) ||
                         (bCryptPasswordEncoder.matches(oldPassword, user.getPassword()))

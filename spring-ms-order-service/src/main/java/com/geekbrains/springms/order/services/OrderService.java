@@ -10,8 +10,10 @@ import com.geekbrains.springms.order.integrations.AddressServiceIntegration;
 import com.geekbrains.springms.order.integrations.ProductServiceIntegration;
 import com.geekbrains.springms.order.integrations.ProductServiceIntegrationCached;
 import com.geekbrains.springms.order.integrations.UserServiceIntegration;
+import com.geekbrains.springms.order.mappers.OrderMapper;
 import com.geekbrains.springms.order.repositories.OrderItemRepository;
 import com.geekbrains.springms.order.repositories.OrderRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class OrderService {
+public class OrderService extends Listenable {
 
     private OrderRepository orderRepository;
     private UserServiceIntegration userServiceIntegration;
@@ -38,6 +40,8 @@ public class OrderService {
     private ProductServiceIntegrationCached productServiceIntegrationCached;
 
     private final OrderIdentityMap ORDER_IDENTITY_MAP = RegistryService.getInstance().getOrderIdentityMap();
+
+
 
     @Autowired
     public void setOrderRepository(OrderRepository orderRepository) {
@@ -55,6 +59,12 @@ public class OrderService {
     @Autowired
     public void setProductServiceIntegrationCached(ProductServiceIntegrationCached productServiceIntegrationCached) {
         this.productServiceIntegrationCached = productServiceIntegrationCached;
+    }
+
+
+    @PostConstruct
+    public void init() {
+        super.attach(new OrderListener());
     }
 
 
@@ -111,7 +121,10 @@ public class OrderService {
                     .toList());
 
             orderRepository.save(order);
+
             ORDER_IDENTITY_MAP.addOrder(order);
+            super.notify(order);
+
             return Optional.of(order);
         }
         return Optional.empty();
@@ -143,4 +156,5 @@ public class OrderService {
 
         return orders.stream().map(orderMapper).toList();
     }
+
 }
