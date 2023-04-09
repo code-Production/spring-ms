@@ -96,13 +96,13 @@ public class UserController {
     public UserDto getUserInfo(@RequestParam(required = false) String username, HttpServletRequest request) {
         String usernameAuthorized = checkAuthorizationHeaderOrThrowException(request);
         boolean specialAuthority = hasSpecialAuthority(request);
-        User user;
+        UserDto userDto;
         if (username != null && specialAuthority) {
-            user = userService.getUserInfoByName(username);
+            userDto = userService.getUserInfoByName(username);
         } else {
-            user = userService.getUserInfoByName(usernameAuthorized);
+            userDto = userService.getUserInfoByName(usernameAuthorized);
         }
-        return UserMapper.MAPPER.toDto(user);
+        return userDto;
     }
 
 

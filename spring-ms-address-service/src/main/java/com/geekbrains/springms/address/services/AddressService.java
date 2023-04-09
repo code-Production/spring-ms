@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class AddressService {
@@ -22,6 +23,8 @@ public class AddressService {
     private RegionRepository regionRepository;
     private CityRepository cityRepository;
     private StreetRepository streetRepository;
+    private final AddressIdentityMap ADDRESS_IDENTITY_MAP = RegistryService.getInstance().getAddressIdentityMap();
+
 
     @Autowired
     public void setCountryRepository(CountryRepository countryRepository) {
@@ -39,27 +42,44 @@ public class AddressService {
     public void setStreetRepository(StreetRepository streetRepository) {
         this.streetRepository = streetRepository;
     }
-
     @Autowired
     public void setAddressRepository(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
     }
-
     @Autowired
     public void setAddressMapper(AddressMapper addressMapper) {
         this.addressMapper = addressMapper;
     }
 
+
     public Address findById(Long id) {
-        return addressRepository.findById(id)
+        Address mappedAddress = ADDRESS_IDENTITY_MAP.findAddress(id);
+        if (mappedAddress != null) {
+            return mappedAddress;
+        }
+
+        Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         String.format("Cannot find address by id '%s'", id)
                 ));
+        ADDRESS_IDENTITY_MAP.addAddress(address);
+        return address;
     }
 
     public List<Address> findAllByUsername(String username) {
-        return addressRepository.findAllByUsername(username);
+        List<Address> addresses = addressRepository.findAllByUsername(username);
+
+        Function<Address, Address> mapper = address -> {
+            Address mappedAddress = ADDRESS_IDENTITY_MAP.findAddress(address.getId());
+            if (mappedAddress != null) {
+                return mappedAddress;
+            }
+            ADDRESS_IDENTITY_MAP.addAddress(address);
+            return address;
+        };
+
+        return addresses.stream().map(mapper).toList();
     }
 
     public Address createOrUpdate(AddressDto addressDto, boolean specialAuthority) {
@@ -73,6 +93,10 @@ public class AddressService {
             if (byId.isEmpty() || !byId.get().getUsername().equals(newAddress.getUsername())) {
                 newAddress.setId(null); //if id not belong to user create new address without error
             }
+        }
+        //clear identity map after id check
+        if (newAddress.getId() != null) {
+            ADDRESS_IDENTITY_MAP.deleteAddress(newAddress.getId());
         }
         return addressRepository.save(newAddress);
     }
@@ -133,7 +157,7 @@ public class AddressService {
         if (!usernameAuthorized.equals(address.getUsername()) && !specialAuthority) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request.");
         }
-
+        ADDRESS_IDENTITY_MAP.deleteAddress(id);
         addressRepository.deleteById(id);
     }
 }

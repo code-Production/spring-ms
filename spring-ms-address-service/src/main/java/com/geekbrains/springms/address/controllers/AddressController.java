@@ -43,7 +43,7 @@ public class AddressController {
     @GetMapping("/all")
     public List<AddressDto> getUserAddresses(@RequestParam(required = false) String username, HttpServletRequest request) {
         String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
-        System.out.println("authorizedUsername:" + request.getHeader("username"));
+
         boolean specialAuthority = hasSpecialAuthority(request);
         if (username != null && !specialAuthority) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request.");

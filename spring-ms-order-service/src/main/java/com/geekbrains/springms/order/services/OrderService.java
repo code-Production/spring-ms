@@ -8,9 +8,12 @@ import com.geekbrains.springms.order.entities.Order;
 import com.geekbrains.springms.order.entities.OrderItem;
 import com.geekbrains.springms.order.integrations.AddressServiceIntegration;
 import com.geekbrains.springms.order.integrations.ProductServiceIntegration;
+import com.geekbrains.springms.order.integrations.ProductServiceIntegrationCached;
 import com.geekbrains.springms.order.integrations.UserServiceIntegration;
+import com.geekbrains.springms.order.mappers.OrderMapper;
 import com.geekbrains.springms.order.repositories.OrderItemRepository;
 import com.geekbrains.springms.order.repositories.OrderRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +22,26 @@ import org.springframework.data.util.Optionals;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.xmlunit.util.Mapper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
-public class OrderService {
+public class OrderService extends Listenable {
 
     private OrderRepository orderRepository;
     private UserServiceIntegration userServiceIntegration;
-
     private AddressServiceIntegration addressServiceIntegration;
+    private ProductServiceIntegrationCached productServiceIntegrationCached;
 
-    private ProductServiceIntegration productServiceIntegration;
+    private final OrderIdentityMap ORDER_IDENTITY_MAP = RegistryService.getInstance().getOrderIdentityMap();
+
+
 
     @Autowired
     public void setOrderRepository(OrderRepository orderRepository) {
@@ -45,16 +52,21 @@ public class OrderService {
     public void setUserServiceIntegration(UserServiceIntegration userServiceIntegration) {
         this.userServiceIntegration = userServiceIntegration;
     }
-
     @Autowired
     public void setAddressServiceIntegration(AddressServiceIntegration addressServiceIntegration) {
         this.addressServiceIntegration = addressServiceIntegration;
     }
-
     @Autowired
-    public void setProductServiceIntegration(ProductServiceIntegration productServiceIntegration) {
-        this.productServiceIntegration = productServiceIntegration;
+    public void setProductServiceIntegrationCached(ProductServiceIntegrationCached productServiceIntegrationCached) {
+        this.productServiceIntegrationCached = productServiceIntegrationCached;
     }
+
+
+    @PostConstruct
+    public void init() {
+        super.attach(new OrderListener());
+    }
+
 
     @Transactional
     public Optional<Order> createOrder(CartDto cartDto, String username) {
@@ -75,7 +87,7 @@ public class OrderService {
         if (cartDto.getItems() != null && !cartDto.getItems().isEmpty()) {
 
             for (CartItemDto item : cartDto.getItems()) {
-                ProductDto productById = productServiceIntegration.findProductById(item.getProductDto().getId());
+                ProductDto productById = productServiceIntegrationCached.findProductById(item.getProductDto().getId());
                 if (!item.getProductDto().getTitle().equals(productById.getTitle())) {
                     String errMsg = String.format("Product with id '%s' has outdated title '%s'.",
                             item.getProductDto().getId(),
@@ -89,12 +101,14 @@ public class OrderService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errMsg);
                 }
             }
+
             Order order = new Order();
             order.setUsername(cartDto.getUsername());
             order.setAddressId(cartDto.getAddressId());
             order.setBillingId(cartDto.getBillingId());
             order.setOrderTotal(cartDto.getTotalPrice());
-            order.setOrderItems(cartDto.getItems().stream()
+            order.setOrderItems(cartDto.getItems()
+                    .stream()
                     .map(cartItemDto -> OrderItem.newBuilder()
                                 .setId(null)
                                 .setOrder(order)
@@ -103,29 +117,44 @@ public class OrderService {
                                 .setAmount(cartItemDto.getAmount())
                                 .setSum(cartItemDto.getSum())
                                 .build()
-//                        new OrderItem(
-//                                        null,
-//                                        order,
-//                                        cartItemDto.getProductDto().getId(),
-//                                        cartItemDto.getProductDto().getPrice(),
-//                                        cartItemDto.getAmount(),
-//                                        cartItemDto.getSum()
-//                                )
                     )
                     .toList());
 
-
             orderRepository.save(order);
+
+            ORDER_IDENTITY_MAP.addOrder(order);
+            super.notify(order);
+
             return Optional.of(order);
         }
         return Optional.empty();
     }
 
-    public Optional<Order> getOrderById(Long id) {
-        return orderRepository.findById(id);
+    public Order getOrderById(Long id) {
+        Order mappedOrder = ORDER_IDENTITY_MAP.findOrder(id);
+        if (mappedOrder != null) {
+            return mappedOrder;
+        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        ORDER_IDENTITY_MAP.addOrder(order);
+        return order;
     }
 
     public List<Order> getUserOrders(String username) {
-        return orderRepository.findAllByUsername(username);
+        List<Order> orders = orderRepository.findAllByUsername(username);
+
+        Function<Order, Order> orderMapper = order -> {
+            Order mappedOrder = ORDER_IDENTITY_MAP.findOrder(order.getId());
+            if (mappedOrder == null) {
+                ORDER_IDENTITY_MAP.addOrder(order);
+                return order;
+            }
+            return mappedOrder;
+        };
+
+        return orders.stream().map(orderMapper).toList();
     }
+
 }
