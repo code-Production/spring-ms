@@ -49,8 +49,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public OrderDto getOrderById(@PathVariable Long id, HttpServletRequest request) {
-        Order order = orderService.getOrderById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Order order = orderService.getOrderById(id);
         String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
         if (!order.getUsername().equals(authorizedUsername)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
@@ -59,15 +58,8 @@ public class OrderController {
     }
 
     @GetMapping("/all")
-    public List<OrderDto> getUserOrders(
-            @RequestHeader String username,
-            HttpServletRequest request
-    )
-    {
-//        String authorizedUsername = checkAuthorizationHeaderOrThrowException(request);
-//        if (username != null && !username.equals(authorizedUsername)) {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
-//        }
+    public List<OrderDto> getUserOrders(HttpServletRequest request) {
+        String username = checkAuthorizationHeaderOrThrowException(request);
         return orderService.getUserOrders(username).stream().map(orderMapper::toDto).toList();
     }
 
@@ -79,17 +71,5 @@ public class OrderController {
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access.");
     }
-//    @GetMapping("/inter")
-//    public Boolean check(@RequestParam String username,
-//                      @RequestParam(name = "billing_id") Long billingId
-//    )
-//    {
-//        return userServiceIntegration.checkIfBillingBelongsToUser(username, billingId);
-//    }
-//
-//    @GetMapping("/inter2")
-//    public AddressDto getUserAddressById(@RequestParam Long id) {
-//        return addressServiceIntegration.getAddressById(id);
-//    }
 
 }
