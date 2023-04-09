@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @Component
-public class ProductServiceIntegration {
+public class ProductServiceIntegration implements ProductFunction {
 
     private WebClient productServiceWebClient;
 
@@ -22,6 +22,7 @@ public class ProductServiceIntegration {
         this.productServiceWebClient = productServiceWebClient;
     }
 
+    @Override
     public ProductDto getProductById(Long id) {
 
         return productServiceWebClient.get()

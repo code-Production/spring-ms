@@ -4,6 +4,7 @@ import com.geekbrains.springms.api.ProductDto;
 import com.geekbrains.springms.product.mappers.ProductMapper;
 import com.geekbrains.springms.product.entities.Product;
 import com.geekbrains.springms.product.services.ProductService;
+import com.geekbrains.springms.product.services.ProductServiceCached;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,9 +18,16 @@ public class ProductController {
 
     private ProductService productService;
 
+    private ProductServiceCached productServiceCached;
+
     @Autowired
     public void setProductService(ProductService productService) {
         this.productService = productService;
+    }
+
+    @Autowired
+    public void setProductServiceCached(ProductServiceCached productServiceCached) {
+        this.productServiceCached = productServiceCached;
     }
 
     @GetMapping("/")
@@ -34,24 +42,25 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ProductDto findProductById(@PathVariable Long id) {
-
-        return productService.findProductById(id)
-                .map(ProductMapper.MAPPER::toDto)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        String.format("Product with id '%s' cannot be found.", id)
-                ));
+        return productServiceCached.findProductById(id);
+//        return productService.findProductById(id);
+//                .map(ProductMapper.MAPPER::toDto)
+//                .orElseThrow(() -> new ResponseStatusException(
+//                        HttpStatus.NOT_FOUND,
+//                        String.format("Product with id '%s' cannot be found.", id)
+//                ));
     }
 
     @DeleteMapping("/{id}")
     public void deleteProductById(@PathVariable Long id, HttpServletResponse response) {
-        productService.deleteProductById(id);
+        productServiceCached.deleteProductById(id);
+//        productService.deleteProductById(id);
     }
 
     @PutMapping("/")
     public ProductDto updateProduct(@RequestBody ProductDto productDto) {
-        Product product = ProductMapper.MAPPER.toEntity(productDto);
-        return ProductMapper.MAPPER.toDto(productService.updateProduct(product));
+        return productServiceCached.updateProduct(productDto);
+//        return productService.updateProduct(productDto);
     }
 
     @PostMapping("/")
